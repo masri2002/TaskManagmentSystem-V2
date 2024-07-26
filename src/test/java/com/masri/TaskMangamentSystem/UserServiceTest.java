@@ -26,11 +26,6 @@ public class UserServiceTest {
     @Autowired
     private UserDao userDao;
 
-    @BeforeEach
-    public void setUp() {
-        userDao.deleteAll();
-    }
-
     @Test
     public void testAddUser() {
         User user = new User();

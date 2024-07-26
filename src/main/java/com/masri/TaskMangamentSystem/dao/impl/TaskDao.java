@@ -4,7 +4,6 @@ import com.masri.TaskMangamentSystem.dao.CrudDao;
 import com.masri.TaskMangamentSystem.entity.Task;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -21,7 +20,7 @@ import java.util.List;
 @Repository
 public class TaskDao implements CrudDao<Task> {
 
-    private final EntityManager em;
+    private final EntityManager entityManager;
 
     /**
      * Constructor for the TaskDao class.
@@ -29,11 +28,11 @@ public class TaskDao implements CrudDao<Task> {
      * Initializes the EntityManager for interacting with the database.
      * </p>
      *
-     * @param em The EntityManager to be used by this DAO.
+     * @param entityManager The EntityManager to be used by this DAO.
      */
     @Autowired
-    public TaskDao(EntityManager em) {
-        this.em = em;
+    public TaskDao(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     /**
@@ -43,7 +42,7 @@ public class TaskDao implements CrudDao<Task> {
      */
     @Override
     public void add(Task task) {
-        em.persist(task);
+        entityManager.persist(task);
     }
 
     /**
@@ -53,7 +52,7 @@ public class TaskDao implements CrudDao<Task> {
      */
     @Override
     public void update(Task task) {
-        em.merge(task);
+        entityManager.merge(task);
     }
 
     /**
@@ -64,7 +63,7 @@ public class TaskDao implements CrudDao<Task> {
      */
     @Override
     public Task findById(int id) {
-        return em.find(Task.class, id);
+        return entityManager.find(Task.class, id);
     }
 
     /**
@@ -80,7 +79,7 @@ public class TaskDao implements CrudDao<Task> {
     public void delete(Task task) {
         Task foundTask = findById(task.getId());
         if (foundTask != null) {
-            em.remove(foundTask);
+            entityManager.remove(foundTask);
         }
     }
 
@@ -91,12 +90,12 @@ public class TaskDao implements CrudDao<Task> {
      */
     @Override
     public List<Task> getAll() {
-        return em.createQuery("FROM Task", Task.class).getResultList();
+        return entityManager.createQuery("FROM Task", Task.class).getResultList();
     }
 
     @Override
     public void deleteAll() {
-       em.createQuery("DELETE FROM Task").executeUpdate();
+        entityManager.createQuery("DELETE FROM Task").executeUpdate();
     }
 
     /**
@@ -107,7 +106,7 @@ public class TaskDao implements CrudDao<Task> {
      */
     public boolean existTaskByTitle(String title) {
         try {
-            em.createQuery("FROM Task WHERE title = :title", Task.class)
+            entityManager.createQuery("FROM Task WHERE title = :title", Task.class)
                     .setParameter("title", title)
                     .getSingleResult();
             return true;
@@ -116,7 +115,7 @@ public class TaskDao implements CrudDao<Task> {
         }
     }
     public Task getTaskProjectById(int taskId){
-        return em.createQuery("select t from Task t "+
+        return entityManager.createQuery("select t from Task t "+
                 "join fetch t.project "+"where t.id=:data",Task.class).setParameter("data",taskId)
                 .getSingleResult();
     }

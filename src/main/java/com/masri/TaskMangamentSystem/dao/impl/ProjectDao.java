@@ -23,8 +23,8 @@ import java.util.List;
 @Repository
 public class ProjectDao implements CrudDao<Project> {
 
-    private static final Logger log = LoggerFactory.getLogger(ProjectDao.class);
-    private final EntityManager em;
+
+    private final EntityManager entityManager;
 
     /**
      * Constructor for the ProjectDao class.
@@ -32,11 +32,11 @@ public class ProjectDao implements CrudDao<Project> {
      * Initializes the EntityManager for interacting with the database.
      * </p>
      *
-     * @param em The EntityManager to be used by this DAO.
+     * @param entityManager The EntityManager to be used by this DAO.
      */
     @Autowired
-    public ProjectDao(EntityManager em) {
-        this.em = em;
+    public ProjectDao(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     /**
@@ -46,7 +46,7 @@ public class ProjectDao implements CrudDao<Project> {
      */
     @Override
     public void add(Project project) {
-        em.persist(project);
+        entityManager.persist(project);
     }
 
     /**
@@ -56,7 +56,7 @@ public class ProjectDao implements CrudDao<Project> {
      */
     @Override
     public void update(Project project) {
-        em.merge(project);
+        entityManager.merge(project);
     }
 
     /**
@@ -67,7 +67,7 @@ public class ProjectDao implements CrudDao<Project> {
      */
     @Override
     public Project findById(int id) {
-        return em.find(Project.class, id);
+        return entityManager.find(Project.class, id);
     }
 
     /**
@@ -77,7 +77,7 @@ public class ProjectDao implements CrudDao<Project> {
      */
     @Override
     public void delete(Project project) {
-        em.remove(project);
+        entityManager.remove(project);
     }
 
     /**
@@ -87,12 +87,12 @@ public class ProjectDao implements CrudDao<Project> {
      */
     @Override
     public List<Project> getAll() {
-        return em.createQuery("from Project", Project.class).getResultList();
+        return entityManager.createQuery("from Project", Project.class).getResultList();
     }
 
     @Override
     public void deleteAll() {
-        em.createQuery("DELETE FROM Project").executeUpdate();
+        entityManager.createQuery("DELETE FROM Project").executeUpdate();
     }
 
     /**
@@ -104,7 +104,7 @@ public class ProjectDao implements CrudDao<Project> {
     public boolean checkExistsByTitle(String title) {
         Project project;
         try {
-            project = em.createQuery("from Project where name=:data", Project.class)
+            project = entityManager.createQuery("from Project where name=:data", Project.class)
                     .setParameter("data", title)
                     .getSingleResult();
         } catch (NoResultException ex) {
@@ -124,16 +124,14 @@ public class ProjectDao implements CrudDao<Project> {
      */
     public Project getProjectWithItsTaskAndUsersById(int id) {
         try {
-            return em.createQuery("SELECT p FROM Project p " +
+            return entityManager.createQuery("SELECT p FROM Project p " +
                             "JOIN FETCH p.tasks " +
                             "JOIN FETCH p.users " +
                             "WHERE p.id = :data", Project.class)
                     .setParameter("data", id)
                     .getSingleResult();
         } catch (NoResultException e) {
-            log.info("null");
+            return findById(id);
         }
-        return findById(id);
     }
-
 }

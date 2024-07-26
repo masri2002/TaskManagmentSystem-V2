@@ -35,10 +35,7 @@ public class TaskServiceTest {
     @Autowired
     private UserService userService;
 
-    @BeforeEach
-    public void setUp() {
-        taskDao.deleteAll();
-    }
+
 
     @Test
     public void testAddTask() {

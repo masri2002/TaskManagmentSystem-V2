@@ -19,15 +19,15 @@ import java.util.List;
  */
 @Repository
 public class UserDao implements CrudDao<User> {
-    private final EntityManager em;
+    private final EntityManager entityManager;
     /**
      * Constructs a UserDao with the specified EntityManager.
      *
-     * @param em the EntityManager to be used for persistence operations.
+     * @param entityManager the EntityManager to be used for persistence operations.
      */
     @Autowired
-    public UserDao(EntityManager em) {
-        this.em = em;
+    public UserDao(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
     /**
      * Adds a new User entity to the database.
@@ -36,7 +36,7 @@ public class UserDao implements CrudDao<User> {
      */
     @Override
     public void add(User user) {
-        em.persist(user);
+        entityManager.persist(user);
     }
     /**
      * Updates an existing User entity in the database.
@@ -45,7 +45,7 @@ public class UserDao implements CrudDao<User> {
      */
     @Override
     public void update(User user) {
-        em.merge(user);
+        entityManager.merge(user);
     }
     /**
      * Checks if a user with the specified email address already exists in the database.
@@ -56,7 +56,7 @@ public class UserDao implements CrudDao<User> {
     public boolean checkEmailUniqueness(String email) {
         User existUser = null;
         try {
-            existUser = em.createQuery("FROM User where email=:data", User.class)
+            existUser = entityManager.createQuery("FROM User where email=:data", User.class)
                     .setParameter("data", email)
                     .getSingleResult();
         } catch (NoResultException e) {
@@ -72,7 +72,7 @@ public class UserDao implements CrudDao<User> {
      */
     @Override
     public User findById(int id) {
-        return em.find(User.class, id);
+        return entityManager.find(User.class, id);
     }
 
     /**
@@ -82,7 +82,7 @@ public class UserDao implements CrudDao<User> {
      */
     @Override
     public void delete(User user) {
-        em.remove(user);
+        entityManager.remove(user);
     }
 
     /**
@@ -92,12 +92,12 @@ public class UserDao implements CrudDao<User> {
      */
     @Override
     public List<User> getAll() {
-        return em.createQuery("FROM User ", User.class).getResultList();
+        return entityManager.createQuery("FROM User ", User.class).getResultList();
     }
 
     @Override
     public void deleteAll() {
-      em.createQuery("delete from User").executeUpdate();
+        entityManager.createQuery("delete from User").executeUpdate();
     }
 
 

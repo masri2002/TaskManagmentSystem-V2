@@ -31,10 +31,7 @@ public class ProjectServiceTest {
     @Autowired
     private UserService userService;
 
-    @BeforeEach
-    public void setUp() {
-        projectDao.deleteAll();
-    }
+
 
     @Test
     public void testAddProject() {

@@ -26,12 +26,5 @@ public enum Priority {
     public int getPriority() {
         return priority;
     }
-    public static Priority castPriority(String s){
-        return switch (s.toUpperCase()) {
-            case "HIGH" -> Priority.HIGH;
-            case "MEDIUM" -> Priority.MEDIUM;
-            case "LOW" -> Priority.LOW;
-            default -> null;
-        };
-    }
+  
 }

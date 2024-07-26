@@ -3,16 +3,12 @@ package com.masri.TaskMangamentSystem.service;
 import com.masri.TaskMangamentSystem.dao.impl.TaskDao;
 import com.masri.TaskMangamentSystem.entity.Project;
 import com.masri.TaskMangamentSystem.entity.Status;
-import com.masri.TaskMangamentSystem.entity.User;
 import com.masri.TaskMangamentSystem.excptions.exception.DuplicateTaskExecption;
 import com.masri.TaskMangamentSystem.excptions.exception.TaskNotExistExecption;
 import com.masri.TaskMangamentSystem.entity.Task;
 import jakarta.transaction.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,7 +25,7 @@ public class TaskService {
 
     private final TaskDao taskDao;
     private final ProjectService projectService;
-    private static final Logger logger = LoggerFactory.getLogger(TaskService.class);
+
 
     /**
      * Constructs a TaskService with the specified TaskDao, ProjectService, and UserService.
