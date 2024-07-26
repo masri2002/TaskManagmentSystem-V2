@@ -6,14 +6,13 @@ Task Management System V2 is a Spring Boot application for managing tasks, proje
 ## Table of Contents
 
 - [Features](#features)
-- [Prerequisites](#prerequisites)
+- [technologies](#technologies)
 - [Setup](#setup)
   - [Clone the Repository](#clone-the-repository)
   - [Configure PostgreSQL Database](#configure-postgresql-database)
   - [Configure the Application](#configure-the-application)
   - [Run the Application](#run-the-application)
 - [Testing](#testing)
-- [Endpoints](#endpoints)
 
 ## Features
 
@@ -23,11 +22,11 @@ Task Management System V2 is a Spring Boot application for managing tasks, proje
 - Assign tasks to projects
 - Assign users to projects
 
-## Prerequisites
+## technologies
 
-- Java 11 or later
-- Maven 3.6 or later
-- PostgreSQL 13 or later
+- Java 21
+- Maven 
+- PostgreSQL 16
 
 ## Setup
 
@@ -61,9 +60,9 @@ cd TaskManagmentSystem-V2
 
 1. **Update `application.properties`**: Update the `src/main/resources/application.properties` file with your PostgreSQL configuration:
    ```properties
-   spring.datasource.url=jdbc:postgresql://localhost:5432/task_management
-   spring.datasource.username=task_user
-   spring.datasource.password=password
+   spring.datasource.url=jdbc:postgresql://localhost:5432/yourdbname
+   spring.datasource.username=userdb_username
+   spring.datasource.password=yourdb-assword
    spring.jpa.hibernate.ddl-auto=update
    ```
 
@@ -83,22 +82,3 @@ To run the tests, use the following command:
 mvn test
 ```
 
-## Endpoints
-
-- **Projects**
-  - `POST /projects`: Create a new project
-  - `GET /projects/{id}`: Get a project by ID
-  - `PUT /projects`: Update a project
-  - `DELETE /projects/{id}`: Delete a project
-
-- **Tasks**
-  - `POST /tasks`: Create a new task
-  - `GET /tasks/{id}`: Get a task by ID
-  - `PUT /tasks/{tId}/project/{pId}`: Assign a task to a project
-  - `DELETE /tasks/{id}`: Delete a task
-
-- **Users**
-  - `POST /users`: Create a new user
-  - `GET /users/{id}`: Get a user by ID
-  - `PUT /users`: Update a user
-  - `DELETE /users/{id}`: Delete a user
