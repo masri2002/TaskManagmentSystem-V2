@@ -2,6 +2,7 @@ package com.masri.TaskMangamentSystem.service;
 
 import com.masri.TaskMangamentSystem.entity.Task;
 import com.masri.TaskMangamentSystem.entity.Status;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +21,10 @@ import jakarta.annotation.PreDestroy;
  * <p>
  * This class uses a fixed thread pool to process tasks concurrently, updating their status and simulating processing time.
  * </p>
+ * @author ahmad almasri
  */
 @Service
+@Transactional
 public class TaskProcessor {
 
     private final ExecutorService executorService;
@@ -57,30 +60,31 @@ public class TaskProcessor {
      * Updates the task in the database after each status change.
      *
      * @param task The task to process.
+     *
      */
-    private void processTask(Task task) {
-        try {
-            synchronized (lock) {
-                System.out.println("Processing task: " + task);
-                if (task.getStatus() == Status.PENDING) {
-                    Thread.sleep(2000); // Simulate processing delay
-                    task.setStatus(Status.IN_PROGRESS);
-                    task.setCreationDate(LocalDate.now().plusDays(random.nextInt(3)));
-                    taskService.updateTask(task); // Persist the status change
-                    logger.info("Task status updated to IN_PROGRESS {}", task);
-                } else if (task.getStatus() == Status.IN_PROGRESS) {
-                    Thread.sleep(10000); // Simulate longer processing delay
-                    task.setStatus(Status.COMPLETED);
-                    task.setDueDate(task.getDueDate().minusDays(random.nextInt(4)));
-                    taskService.updateTask(task); // Persist the status change
-                    logger.info("Task status updated to COMPLETED {}", task);
+        private void processTask(Task task) {
+            try {
+                synchronized (lock) {
+                    logger.info("Processing task: {}", task);
+                    if (task.getStatus() == Status.PENDING) {
+                        Thread.sleep(2000); // Simulate processing delay
+                        task.setStatus(Status.IN_PROGRESS);
+                        task.setCreationDate(task.getCreationDate().plusDays(random.nextInt(2)));
+                        taskService.updateTask(task);
+                        logger.info("Task status updated to IN_PROGRESS: {}", task);
+                    } else if (task.getStatus() == Status.IN_PROGRESS) {
+                        Thread.sleep(10000); // Simulate longer processing delay
+                        task.setStatus(Status.COMPLETED);
+                        task.setCreationDate(task.getDueDate().minusDays(random.nextInt(4)));
+                        taskService.updateTask(task);
+                        logger.info("Task status updated to COMPLETED: {}", task);
+                    }
                 }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.warn("Task processing interrupted for task: {}", task);
             }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            logger.warn("Task processing interrupted for task {}", task);
         }
-    }
 
     /**
      * Processes a list of tasks asynchronously.

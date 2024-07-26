@@ -2,6 +2,7 @@ package com.masri.TaskMangamentSystem.excptions.exception;
 
 /**
  * Exception thrown when attempting to add a duplicate project.
+ * @author ahmad almasri
  */
 public class DuplicateProjectsException extends RuntimeException {
 

@@ -15,9 +15,9 @@ import java.util.List;
 /**
  * DAO (Data Access Object) class for managing User entities.
  * Provides CRUD operations and additional methods for user-specific queries.
+ * @author ahmad almasri
  */
 @Repository
-@Transactional
 public class UserDao implements CrudDao<User> {
     private final EntityManager em;
     /**

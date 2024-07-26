@@ -16,9 +16,9 @@ import java.util.List;
  * This class provides methods for basic CRUD operations and additional queries specific
  * to the {@link Task} entity.
  * </p>
+ * @author ahmdd almasri
  */
 @Repository
-@Transactional
 public class TaskDao implements CrudDao<Task> {
 
     private final EntityManager em;
@@ -114,5 +114,10 @@ public class TaskDao implements CrudDao<Task> {
         } catch (NoResultException e) {
             return false;
         }
+    }
+    public Task getTaskProjectById(int taskId){
+        return em.createQuery("select t from Task t "+
+                "join fetch t.project "+"where t.id=:data",Task.class).setParameter("data",taskId)
+                .getSingleResult();
     }
 }

@@ -9,6 +9,7 @@ import java.util.Objects;
 /**
  * Represents a task in the task management system.
  * Each task is associated with a project and has a priority, status, due date, and creation date.
+ * @author ahmad almasri
  */
 @Entity
 @Table(name = "tasks")
@@ -219,6 +220,18 @@ public class Task {
      */
     public void setProject(Project project) {
         this.project = project;
+    }
+
+    @Override
+    public String toString() {
+        return "Task{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", priority=" + priority +
+                ", status=" + status +
+                ", dueDate=" + dueDate +
+                '}';
     }
 
     @Override

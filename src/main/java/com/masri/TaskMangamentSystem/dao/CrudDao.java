@@ -8,6 +8,7 @@ import java.util.List;
  * for managing entities in the data store.
  *
  * @param <T> The type of entity the DAO will manage.
+ * @author ahmad almasri
  */
 public interface CrudDao<T> {
 

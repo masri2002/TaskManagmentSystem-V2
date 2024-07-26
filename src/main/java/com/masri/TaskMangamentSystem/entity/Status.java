@@ -2,6 +2,7 @@ package com.masri.TaskMangamentSystem.entity;
 
 /**
  * Enum representing the status of a task.
+ * @author ahmad almasri
  */
 public enum Status {
     /**

@@ -6,6 +6,7 @@ import com.masri.TaskMangamentSystem.entity.User;
 import com.masri.TaskMangamentSystem.excptions.exception.DuplicateTaskExecption;
 import com.masri.TaskMangamentSystem.excptions.exception.TaskNotExistExecption;
 import com.masri.TaskMangamentSystem.entity.Task;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +18,14 @@ import java.time.LocalDate;
  * Service class that manages tasks in the Task Management System.
  * Provides functionality for adding, retrieving, updating, and deleting tasks,
  * as well as assigning tasks to projects.
+ * @author ahmad almasri
  */
 @Service
+@Transactional
 public class TaskService {
 
     private final TaskDao taskDao;
     private final ProjectService projectService;
-    private final UserService userService;
     private static final Logger logger = LoggerFactory.getLogger(TaskService.class);
 
     /**
@@ -31,13 +33,12 @@ public class TaskService {
      *
      * @param taskDao        the DAO used to interact with task data
      * @param projectService the service used to interact with project data
-     * @param userService    the service used to interact with user data
      */
     @Autowired
-    public TaskService(TaskDao taskDao, ProjectService projectService, UserService userService) {
+    public TaskService(TaskDao taskDao, ProjectService projectService) {
         this.taskDao = taskDao;
         this.projectService = projectService;
-        this.userService = userService;
+
     }
 
     /**
@@ -114,6 +115,9 @@ public class TaskService {
         if (task.getProject() != null) {
             oldTask.setProject(task.getProject());
         }
+        if(task.getCreationDate()!=null){
+            oldTask.setCreationDate(task.getCreationDate());
+        }
 
         taskDao.update(oldTask);
     }
@@ -130,5 +134,9 @@ public class TaskService {
         task.setProject(project);
         project.addTask(task);
         projectService.updateProject(project);
+    }
+
+    public Project getProjectById(int taskId){
+        return taskDao.getTaskProjectById(taskId).getProject();
     }
 }

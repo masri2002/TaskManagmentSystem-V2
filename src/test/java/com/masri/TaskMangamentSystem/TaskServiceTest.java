@@ -1,135 +1,118 @@
-//package com.masri.TaskMangamentSystem;
-//
-//import com.masri.TaskMangamentSystem.dao.impl.TaskDao;
-//import com.masri.TaskMangamentSystem.entity.Project;
-//import com.masri.TaskMangamentSystem.entity.Task;
-//import com.masri.TaskMangamentSystem.entity.Priority;
-//import com.masri.TaskMangamentSystem.entity.Status;
-//import com.masri.TaskMangamentSystem.excptions.exception.DuplicateTaskExecption;
-//import com.masri.TaskMangamentSystem.excptions.exception.TaskNotExistExecption;
-//import com.masri.TaskMangamentSystem.service.ProjectService;
-//import com.masri.TaskMangamentSystem.service.TaskService;
-//import com.masri.TaskMangamentSystem.service.UserService;
-//import jakarta.transaction.Transactional;
-//import org.junit.jupiter.api.Test;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.context.SpringBootTest;
-//import java.time.LocalDate;
-//import static org.junit.jupiter.api.Assertions.*;
-//
-//
-//@SpringBootTest
-//@Transactional
-//class TaskServiceTest {
-//
-//    @Autowired
-//    private TaskService taskService;
-//
-//    @Autowired
-//    private TaskDao taskDao;
-//
-//    @Autowired
-//    private ProjectService projectService;
-//
-//    @Autowired
-//    private UserService userService;
-//
-//    @Test
-//    void testAddTask_TaskDoesNotExist() {
-//        // Arrange
-//        Task task = new Task("New Task", "Task Description", Priority.HIGH, Status.PENDING, LocalDate.now());
-//
-//        // Act
-//        taskService.addTask(task);
-//
-//        // Assert
-//        Task savedTask = taskDao.findById(task.getId());
-//        assertNotNull(savedTask);
-//        assertEquals(task.getTitle(), savedTask.getTitle());
-//    }
-//
-//    @Test
-//    void testAddTask_TaskAlreadyExists() {
-//        // Arrange
-//        Task task = new Task("Existing Task", "Task Description", Priority.HIGH, Status.PENDING, LocalDate.now());
-//        taskDao.add(task);
-//
-//        // Act & Assert
-//        DuplicateTaskExecption exception = assertThrows(DuplicateTaskExecption.class, () -> taskService.addTask(task));
-//        assertEquals("Task already exists", exception.getMessage());
-//    }
-//
-//    @Test
-//    void testGetById_TaskExists() {
-//        // Arrange
-//        Task task = new Task("Task", "Description", Priority.HIGH, Status.PENDING, LocalDate.now());
-//        taskDao.add(task);
-//
-//        // Act
-//        Task result = taskService.getById(task.getId());
-//
-//        // Assert
-//        assertEquals(task, result);
-//    }
-//
-//    @Test
-//    void testGetById_TaskDoesNotExist() {
-//        // Act & Assert
-//        TaskNotExistExecption exception = assertThrows(TaskNotExistExecption.class, () -> taskService.getById(1));
-//        assertEquals("Task does not exist", exception.getMessage());
-//    }
-//
-//    @Test
-//    void testDeleteTask_Success() {
-//        // Arrange
-//        Task task = new Task("Task", "Description", Priority.HIGH, Status.PENDING, LocalDate.now());
-//        taskDao.add(task);
-//
-//        // Act
-//        taskService.deleteTask(task.getId());
-//
-//        // Assert
-//        assertNull(taskDao.findById(task.getId()));
-//    }
-//
-//    @Test
-//    void testDeleteTask_TaskDoesNotExist() {
-//        // Act & Assert
-//        TaskNotExistExecption exception = assertThrows(TaskNotExistExecption.class, () -> taskService.deleteTask(1));
-//        assertEquals("Task does not exist", exception.getMessage());
-//    }
-//
-//    @Test
-//    void testUpdateTask_Success() {
-//        // Arrange
-//        Task oldTask = new Task("Old Task", "Old Description", Priority.HIGH, Status.PENDING, LocalDate.now());
-//        taskDao.add(oldTask);
-//        Task newTask = new Task("New Task", "New Description", Priority.MEDIUM, Status.IN_PROGRESS, LocalDate.now().plusDays(1));
-//        newTask.setId(oldTask.getId());
-//
-//        // Act
-//        taskService.updateTask(newTask);
-//
-//        // Assert
-//        Task updatedTask = taskDao.findById(newTask.getId());
-//        assertEquals(newTask.getTitle(), updatedTask.getTitle());
-//        assertEquals(newTask.getDescription(), updatedTask.getDescription());
-//        assertEquals(newTask.getPriority(), updatedTask.getPriority());
-//        assertEquals(newTask.getStatus(), updatedTask.getStatus());
-//        assertEquals(newTask.getDueDate(), updatedTask.getDueDate());
-//        assertEquals(newTask.getProject(), updatedTask.getProject());
-//    }
-//
-//    @Test
-//    void testUpdateTask_TaskDoesNotExist() {
-//        // Arrange
-//        Task task = new Task("Task", "Description", Priority.HIGH, Status.PENDING, LocalDate.now());
-//        task.setId(1);
-//
-//        // Act & Assert
-//        TaskNotExistExecption exception = assertThrows(TaskNotExistExecption.class, () -> taskService.updateTask(task));
-//        assertEquals("Task does not exist", exception.getMessage());
-//    }
-//
-//
-//}
+package com.masri.TaskMangamentSystem;
+
+import com.masri.TaskMangamentSystem.dao.impl.TaskDao;
+import com.masri.TaskMangamentSystem.entity.Project;
+import com.masri.TaskMangamentSystem.entity.Task;
+import com.masri.TaskMangamentSystem.excptions.exception.DuplicateTaskExecption;
+import com.masri.TaskMangamentSystem.excptions.exception.TaskNotExistExecption;
+import com.masri.TaskMangamentSystem.service.ProjectService;
+import com.masri.TaskMangamentSystem.service.TaskService;
+import com.masri.TaskMangamentSystem.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@ExtendWith(SpringExtension.class)
+@SpringBootTest
+@Transactional
+@ActiveProfiles("test") // Use the test profile for the H2 database
+public class TaskServiceTest {
+
+    @Autowired
+    private TaskService taskService;
+
+    @Autowired
+    private TaskDao taskDao;
+
+    @Autowired
+    private ProjectService projectService;
+
+    @Autowired
+    private UserService userService;
+
+    @BeforeEach
+    public void setUp() {
+        taskDao.deleteAll();
+    }
+
+    @Test
+    public void testAddTask() {
+        Task task = new Task();
+        task.setTitle("Test Task");
+        task.setDescription("Test Description");
+        taskService.addTask(task);
+
+        Task fetchedTask = taskService.getById(task.getId());
+        assertNotNull(fetchedTask);
+        assertEquals("Test Task", fetchedTask.getTitle());
+        assertEquals("Test Description", fetchedTask.getDescription());
+    }
+
+    @Test
+    public void testAddDuplicateTask() {
+        Task task = new Task();
+        task.setTitle("Test Task");
+        taskService.addTask(task);
+
+        Task duplicateTask = new Task();
+        duplicateTask.setTitle("Test Task");
+
+        assertThrows(DuplicateTaskExecption.class, () -> {
+            taskService.addTask(duplicateTask);
+        });
+    }
+
+    @Test
+    public void testUpdateTask() {
+        Task task = new Task();
+        task.setTitle("Old Task");
+        task.setDescription("Old Description");
+        taskService.addTask(task);
+
+        task.setTitle("Updated Task");
+        task.setDescription("Updated Description");
+        taskService.updateTask(task);
+
+        Task fetchedTask = taskService.getById(task.getId());
+        assertEquals("Updated Task", fetchedTask.getTitle());
+        assertEquals("Updated Description", fetchedTask.getDescription());
+    }
+
+    @Test
+    public void testDeleteTask() {
+        Task task = new Task();
+        task.setTitle("To be deleted");
+        task.setDescription("To be deleted description");
+        taskService.addTask(task);
+
+        taskService.deleteTask(task.getId());
+        assertThrows(TaskNotExistExecption.class, () -> {
+            taskService.getById(task.getId());
+        });
+    }
+
+    @Test
+    public void testAssignTaskToProject() {
+        Project project = new Project();
+        project.setName("Project");
+        projectService.addProject(project);
+
+        Task task = new Task();
+        task.setTitle("Task");
+        taskService.addTask(task);
+
+        taskService.assignTaskToProject(task.getId(), project.getId());
+
+        Task fetchedTask = taskService.getById(task.getId());
+        assertNotNull(fetchedTask.getProject());
+        assertEquals(project.getId(), fetchedTask.getProject().getId());
+    }
+}

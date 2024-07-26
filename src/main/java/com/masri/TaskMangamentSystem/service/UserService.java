@@ -5,14 +5,17 @@ import com.masri.TaskMangamentSystem.entity.Project;
 import com.masri.TaskMangamentSystem.entity.User;
 import com.masri.TaskMangamentSystem.excptions.exception.DuplicateUserExecption;
 import com.masri.TaskMangamentSystem.excptions.exception.UserNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
  * Service class that manages users in the Task Management System.
  * Provides functionality for adding, retrieving, updating, and deleting users.
+ * @author ahmad almasri
  */
 @Service
+@Transactional
 public class UserService {
 
     private final UserDao userDao;
@@ -91,12 +94,11 @@ public class UserService {
      */
     public void deleteUserById(int id) throws UserNotFoundException {
         User user = getUserById(id);
-
         // Remove user from all projects
+        if(user.getProjects()!=null)
         for (Project project : user.getProjects()) {
             project.getUsers().remove(user);
         }
-
         userDao.delete(user);
     }
 }

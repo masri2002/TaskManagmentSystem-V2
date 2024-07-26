@@ -1,5 +1,6 @@
 package com.masri.TaskMangamentSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -10,6 +11,7 @@ import java.util.Set;
 /**
  * Represents a project in the task management system.
  * A project can have multiple tasks and users associated with it.
+ * @author ahmad almasri
  */
 @Entity
 @Table(name = "projects")
@@ -113,6 +115,8 @@ public class Project {
      * @return the set of tasks
      */
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    @JsonIgnore
     public Set<Task> getTasks() {
         return tasks;
     }
@@ -131,14 +135,15 @@ public class Project {
      *
      * @return the set of users
      */
-    @ManyToMany(cascade = {
+    @ManyToMany(fetch = FetchType.LAZY,cascade = {
             CascadeType.PERSIST,
             CascadeType.MERGE
     })
     @JoinTable(name = "user_projects",
             joinColumns = {@JoinColumn(name = "project_id")},
             inverseJoinColumns = {@JoinColumn(name = "user_id")})
-
+    @JsonManagedReference
+    @JsonIgnore
     public Set<User> getUsers() {
         return users;
     }

@@ -12,12 +12,7 @@ import java.util.Set;
  * Represents a user in the task management system.
  * Each user has a unique identifier, a name, and an email address.
  * A user can be associated with multiple projects.
- * <p>
- * The class uses JPA annotations for ORM mapping and includes validation constraints
- * to ensure that the user's name and email are not empty and that the email is valid.
- * </p>
- *
- * @author Ahmad Al-Masri
+ * @author ahmad almasri
  */
 @Entity
 @Table(name = "users")

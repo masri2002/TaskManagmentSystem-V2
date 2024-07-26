@@ -18,6 +18,7 @@ import java.util.Map;
  * <p>
  * This class uses Spring's {@link ControllerAdvice} to handle exceptions and return appropriate HTTP responses.
  * </p>
+ * @author ahmad almasri
  */
 @ControllerAdvice
 public class CustomExceptionHandler {
@@ -106,6 +107,12 @@ public class CustomExceptionHandler {
 
         return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
     }
+    /**
+     * Handles exceptions for projects that do not exist.
+     *
+     * @param ex The ProjectNotFoundExecption containing the error message.
+     * @return A ResponseEntity containing the error message and an HTTP status of CONFLICT.
+     */
     @ExceptionHandler(ProjectNotFoundExecption.class)
     @ResponseStatus(HttpStatus.CONFLICT) // Use CONFLICT to indicate a problem with task identification
     @ResponseBody

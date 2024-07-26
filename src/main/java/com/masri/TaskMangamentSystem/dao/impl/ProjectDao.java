@@ -18,9 +18,9 @@ import java.util.List;
  * This class provides methods for basic CRUD operations and additional queries specific
  * to the {@link Project} entity.
  * </p>
+ * @author ahmad almasri
  */
 @Repository
-@Transactional
 public class ProjectDao implements CrudDao<Project> {
 
     private static final Logger log = LoggerFactory.getLogger(ProjectDao.class);

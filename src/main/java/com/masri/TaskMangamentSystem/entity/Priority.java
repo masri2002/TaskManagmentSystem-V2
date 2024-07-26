@@ -2,6 +2,7 @@ package com.masri.TaskMangamentSystem.entity;
 
 /**
  * Enumeration representing task priorities.
+ * @author ahmad almasri
  */
 public enum Priority {
     HIGH(3),    // High priority

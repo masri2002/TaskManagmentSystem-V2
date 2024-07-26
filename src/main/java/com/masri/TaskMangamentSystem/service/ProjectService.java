@@ -3,6 +3,7 @@ package com.masri.TaskMangamentSystem.service;
 import com.masri.TaskMangamentSystem.dao.impl.ProjectDao;
 import com.masri.TaskMangamentSystem.entity.*;
 import com.masri.TaskMangamentSystem.excptions.exception.*;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,9 +11,10 @@ import java.util.List;
 /**
  * Service class for managing projects and their associated tasks.
  * Provides methods for adding, retrieving, updating, and deleting projects.
- * Also includes functionality to process tasks within a project.
+ * @author ahmad almasri
  */
 @Service
+@Transactional
 public class ProjectService {
 
     private final ProjectDao projectDao;
