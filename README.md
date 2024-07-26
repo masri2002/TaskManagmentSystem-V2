@@ -21,7 +21,7 @@ Task Management System V2 is a Spring Boot application for managing tasks, proje
 - Create, update, delete, and retrieve users
 - Assign tasks to projects
 - Assign users to projects
-
+- process project tasks
 ## technologies
 
 - Java 21
@@ -43,26 +43,26 @@ cd TaskManagmentSystem-V2
 
 2. **Create a Database**:
    ```sql
-   CREATE DATABASE task_management;
+   CREATE DATABASE your-db-name;
    ```
 
 3. **Create a User**:
    ```sql
-   CREATE USER task_user WITH ENCRYPTED PASSWORD 'password';
+   CREATE USER task_user WITH ENCRYPTED PASSWORD 'your-db-password';
    ```
 
 4. **Grant Privileges**:
    ```sql
-   GRANT ALL PRIVILEGES ON DATABASE task_management TO task_user;
+   GRANT ALL PRIVILEGES ON DATABASE yourDatabaseName TO your-db-username;
    ```
 
 ### Configure the Application
 
 1. **Update `application.properties`**: Update the `src/main/resources/application.properties` file with your PostgreSQL configuration:
    ```properties
-   spring.datasource.url=jdbc:postgresql://localhost:5432/yourdbname
-   spring.datasource.username=userdb_username
-   spring.datasource.password=yourdb-assword
+   spring.datasource.url=jdbc:postgresql://localhost:5432/your-db-name
+   spring.datasource.username=your-db_username
+   spring.datasource.password=your-db-password
    spring.jpa.hibernate.ddl-auto=update
    ```
 
