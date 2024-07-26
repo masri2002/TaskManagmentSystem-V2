@@ -75,7 +75,7 @@ public class ProjectController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getProject(@PathVariable int id){
-        return ResponseEntity.ok(service.getById(id));
+        return ResponseEntity.ok((service.getById(id)));
     }
 
     /**
@@ -124,5 +124,9 @@ public class ProjectController {
     @GetMapping("{pId}/task")
     public ResponseEntity<?> getProjectTasks(@PathVariable int pId){
         return ResponseEntity.ok(service.getProjectTaskById(pId));
+    }
+    @GetMapping("{pId}/task/status")
+    public ResponseEntity<?> getTasksCountByStatus(@PathVariable int pId){
+        return ResponseEntity.ok(service.countTasksStatus(pId));
     }
 }

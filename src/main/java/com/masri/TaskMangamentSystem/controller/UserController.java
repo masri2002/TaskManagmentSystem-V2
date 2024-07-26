@@ -1,7 +1,9 @@
 package com.masri.TaskMangamentSystem.controller;
 
+
 import com.masri.TaskMangamentSystem.entity.User;
 import com.masri.TaskMangamentSystem.service.UserService;
+
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +48,7 @@ public class UserController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable int id){
-        return ResponseEntity.ok(service.getUserById(id));
+        return ResponseEntity.ok((service.getUserById(id)));
     }
 
     /**

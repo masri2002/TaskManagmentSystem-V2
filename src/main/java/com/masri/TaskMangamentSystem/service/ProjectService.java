@@ -7,6 +7,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Service class for managing projects and their associated tasks.
@@ -137,6 +139,23 @@ public class ProjectService {
         project.addUser(user);
         updateProject(project);
     }
+    public Map<Status, Long> countTasksStatus(int projectId) throws ProjectNotFoundExecption, ProjectNotContainsTaskException {
+        Project project = getProjectDetails(projectId);
+        if (project.getTasks().isEmpty()) {
+            throw new ProjectNotContainsTaskException("Project does not have tasks");
+        }
+        return project.getTasks().stream()
+                .collect(Collectors.groupingBy(Task::getStatus, Collectors.counting()));
+    }
 
+    public long countTasksByStatus(int projectId, Status status) throws ProjectNotFoundExecption, ProjectNotContainsTaskException {
+        Project project = getProjectDetails(projectId);
+        if (project.getTasks().isEmpty()) {
+            throw new ProjectNotContainsTaskException("Project does not have tasks");
+        }
+        return project.getTasks().stream()
+                .filter(task -> task.getStatus() == status)
+                .count();
+    }
 
 }

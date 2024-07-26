@@ -2,6 +2,7 @@ package com.masri.TaskMangamentSystem.service;
 
 import com.masri.TaskMangamentSystem.dao.impl.TaskDao;
 import com.masri.TaskMangamentSystem.entity.Project;
+import com.masri.TaskMangamentSystem.entity.Status;
 import com.masri.TaskMangamentSystem.entity.User;
 import com.masri.TaskMangamentSystem.excptions.exception.DuplicateTaskExecption;
 import com.masri.TaskMangamentSystem.excptions.exception.TaskNotExistExecption;
@@ -13,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Service class that manages tasks in the Task Management System.
@@ -138,5 +141,9 @@ public class TaskService {
 
     public Project getProjectById(int taskId){
         return taskDao.getTaskProjectById(taskId).getProject();
+    }
+    public Map<Status, Long> TasksCountGroupingByStatus() {
+        return taskDao.getAll().stream()
+                .collect(Collectors.groupingBy(Task::getStatus, Collectors.counting()));
     }
 }

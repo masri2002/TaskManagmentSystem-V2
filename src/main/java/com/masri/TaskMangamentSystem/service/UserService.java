@@ -96,9 +96,9 @@ public class UserService {
         User user = getUserById(id);
         // Remove user from all projects
         if(user.getProjects()!=null)
-        for (Project project : user.getProjects()) {
-            project.getUsers().remove(user);
-        }
+            for (Project project : user.getProjects()) {
+                project.getUsers().remove(user);
+            }
         userDao.delete(user);
     }
 }

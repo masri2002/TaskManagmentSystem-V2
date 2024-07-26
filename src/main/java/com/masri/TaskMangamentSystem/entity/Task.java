@@ -1,6 +1,7 @@
 package com.masri.TaskMangamentSystem.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -30,10 +31,10 @@ public class Task {
 
     private Status status;
 
-
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dueDate;
 
-
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate creationDate;
 
 

@@ -83,4 +83,9 @@ public class TaskController {
     public ResponseEntity<?> getProjectById(@PathVariable int id) {
         return ResponseEntity.ok(taskService.getProjectById(id));
     }
+
+    @GetMapping("/status")
+    public ResponseEntity<?> getStatusCountForTask() {
+        return ResponseEntity.ok(taskService.TasksCountGroupingByStatus());
+    }
 }
