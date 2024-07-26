@@ -1,9 +1,6 @@
 package com.masri.TaskMangamentSystem.excptions.contolleradvicer;
 
-import com.masri.TaskMangamentSystem.excptions.exception.DuplicateTaskExecption;
-import com.masri.TaskMangamentSystem.excptions.exception.DuplicateUserExecption;
-import com.masri.TaskMangamentSystem.excptions.exception.TaskNotExistExecption;
-import com.masri.TaskMangamentSystem.excptions.exception.UserNotFoundException;
+import com.masri.TaskMangamentSystem.excptions.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -16,9 +13,21 @@ import org.springframework.validation.FieldError;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Global exception handler for handling specific exceptions across the application.
+ * <p>
+ * This class uses Spring's {@link ControllerAdvice} to handle exceptions and return appropriate HTTP responses.
+ * </p>
+ */
 @ControllerAdvice
 public class CustomExceptionHandler {
 
+    /**
+     * Handles validation exceptions thrown during method argument validation.
+     *
+     * @param ex The MethodArgumentNotValidException containing details of validation errors.
+     * @return A ResponseEntity containing a map of validation errors and an HTTP status of BAD_REQUEST.
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
@@ -33,11 +42,12 @@ public class CustomExceptionHandler {
 
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
+
     /**
      * Handles exceptions for duplicate user emails.
      *
-     * @param ex The DuplicateUserException containing the error message.
-     * @return A ResponseEntity containing the error message.
+     * @param ex The DuplicateUserExecption containing the error message.
+     * @return A ResponseEntity containing the error message and an HTTP status of CONFLICT.
      */
     @ExceptionHandler(DuplicateUserExecption.class)
     @ResponseStatus(HttpStatus.CONFLICT) // Use CONFLICT to indicate a duplicate resource
@@ -49,6 +59,12 @@ public class CustomExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
     }
 
+    /**
+     * Handles exceptions for duplicate tasks.
+     *
+     * @param ex The DuplicateTaskExecption containing the error message.
+     * @return A ResponseEntity containing the error message and an HTTP status of CONFLICT.
+     */
     @ExceptionHandler(DuplicateTaskExecption.class)
     @ResponseStatus(HttpStatus.CONFLICT) // Use CONFLICT to indicate a duplicate resource
     @ResponseBody
@@ -58,8 +74,15 @@ public class CustomExceptionHandler {
 
         return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
     }
+
+    /**
+     * Handles exceptions for users not found.
+     *
+     * @param ex The UserNotFoundException containing the error message.
+     * @return A ResponseEntity containing the error message and an HTTP status of CONFLICT.
+     */
     @ExceptionHandler(UserNotFoundException.class)
-    @ResponseStatus(HttpStatus.CONFLICT) // Use CONFLICT to indicate a duplicate resource
+    @ResponseStatus(HttpStatus.CONFLICT) // Use CONFLICT to indicate a problem with user identification
     @ResponseBody
     public ResponseEntity<Map<String, String>> handleUserNotFoundExceptions(UserNotFoundException ex) {
         Map<String, String> errors = new HashMap<>();
@@ -67,12 +90,28 @@ public class CustomExceptionHandler {
 
         return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
     }
+
+    /**
+     * Handles exceptions for tasks that do not exist.
+     *
+     * @param ex The TaskNotExistExecption containing the error message.
+     * @return A ResponseEntity containing the error message and an HTTP status of CONFLICT.
+     */
     @ExceptionHandler(TaskNotExistExecption.class)
-    @ResponseStatus(HttpStatus.CONFLICT) // Use CONFLICT to indicate a duplicate resource
+    @ResponseStatus(HttpStatus.CONFLICT) // Use CONFLICT to indicate a problem with task identification
     @ResponseBody
     public ResponseEntity<Map<String, String>> handleTaskNotFoundExceptions(TaskNotExistExecption ex) {
         Map<String, String> errors = new HashMap<>();
         errors.put("Task", ex.getMessage());
+
+        return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
+    }
+    @ExceptionHandler(ProjectNotFoundExecption.class)
+    @ResponseStatus(HttpStatus.CONFLICT) // Use CONFLICT to indicate a problem with task identification
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> handleProjectNotFoundExceptions(ProjectNotFoundExecption ex) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("Project", ex.getMessage());
 
         return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
     }

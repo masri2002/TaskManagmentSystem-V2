@@ -1,161 +1,134 @@
 package com.masri.TaskMangamentSystem.service;
 
 import com.masri.TaskMangamentSystem.dao.impl.TaskDao;
+import com.masri.TaskMangamentSystem.entity.Project;
+import com.masri.TaskMangamentSystem.entity.User;
 import com.masri.TaskMangamentSystem.excptions.exception.DuplicateTaskExecption;
 import com.masri.TaskMangamentSystem.excptions.exception.TaskNotExistExecption;
-import com.masri.TaskMangamentSystem.entity.Priority;
-import com.masri.TaskMangamentSystem.entity.Status;
 import com.masri.TaskMangamentSystem.entity.Task;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.time.LocalDate;
 
 /**
  * Service class that manages tasks in the Task Management System.
+ * Provides functionality for adding, retrieving, updating, and deleting tasks,
+ * as well as assigning tasks to projects.
  */
 @Service
 public class TaskService {
 
-    private final TaskDao dao;
-    private final Logger logger;
+    private final TaskDao taskDao;
+    private final ProjectService projectService;
+    private final UserService userService;
+    private static final Logger logger = LoggerFactory.getLogger(TaskService.class);
 
+    /**
+     * Constructs a TaskService with the specified TaskDao, ProjectService, and UserService.
+     *
+     * @param taskDao        the DAO used to interact with task data
+     * @param projectService the service used to interact with project data
+     * @param userService    the service used to interact with user data
+     */
     @Autowired
-    public TaskService(TaskDao dao) {
-        this.dao = dao;
-        this.logger = LoggerFactory.getLogger(TaskService.class);
+    public TaskService(TaskDao taskDao, ProjectService projectService, UserService userService) {
+        this.taskDao = taskDao;
+        this.projectService = projectService;
+        this.userService = userService;
     }
 
     /**
-     * Adds a task to the database.
+     * Adds a new task if it does not already exist.
      *
-     * @param task The task to add.
-     * @return true if the task was successfully added
-     * @throws DuplicateTaskExecption If the task already exists.
+     * @param task the task to be added
+     * @throws DuplicateTaskExecption if a task with the same title already exists
      */
-    public boolean add(Task task) {
-        if (dao.existTaskByTitle(task.getTitle())) {
-            throw new DuplicateTaskExecption("Task Already Exists");
+    public void addTask(Task task) {
+        if (taskDao.existTaskByTitle(task.getTitle())) {
+            throw new DuplicateTaskExecption("Task already exists");
         } else {
-            dao.add(task);
-            logger.info("Task added: {}", task);
-            return true;
+            task.setCreationDate(LocalDate.now());
+            taskDao.add(task);
         }
     }
 
     /**
-     * Updates an existing task by its ID.
+     * Retrieves a task by its unique identifier.
      *
-     * @param task The updated task object.
-     * @throws TaskNotExistExecption If the task with the given ID does not exist.
+     * @param id the unique identifier of the task
+     * @return the task with the specified ID
+     * @throws TaskNotExistExecption if no task is found with the given ID
      */
-    public void update(Task task) throws TaskNotExistExecption {
-        Task existingTask = getById(task.getId());
-        if (task.getPriority() != null)
-            existingTask.setPriority(task.getPriority());
-        if (task.getDate() != null)
-            existingTask.setDate(task.getDate());
-        if (task.getStatus() != null)
-            existingTask.setStatus(task.getStatus());
-        if (task.getDueDate() != null)
-            existingTask.setDueDate(task.getDueDate());
-        if (task.getDescription() != null)
-            existingTask.setDescription(task.getDescription());
-        if (task.getTitle() != null)
-            existingTask.setTitle(task.getTitle());
-
-        dao.update(existingTask);
-        logger.info("Task updated: {}", existingTask);
-    }
-
-    /**
-     * Updates the status of a task by its ID.
-     *
-     * @param id     The ID of the task to update.
-     * @param status The new status of the task.
-     * @throws TaskNotExistExecption If the task with the given ID does not exist.
-     */
-    public void updateTaskStatus(int id, Status status) throws TaskNotExistExecption {
-        Task task = getById(id);
-        task.setStatus(status);
-        dao.update(task);
-        logger.info("Task status updated: {} to {}", task.getId(), status);
-    }
-
-    /**
-     * Updates the priority of a task by its ID.
-     *
-     * @param id       The ID of the task to update.
-     * @param priority The new priority of the task.
-     * @throws TaskNotExistExecption If the task with the given ID does not exist.
-     */
-    public void updatePriority(int id, Priority priority) throws TaskNotExistExecption {
-        Task task = getById(id);
-        task.setPriority(priority);
-        dao.update(task);
-        logger.info("Task priority updated: {} to {}", task.getId(), priority);
-    }
-
-    /**
-     * Deletes a task by its ID.
-     *
-     * @param id The ID of the task to delete.
-     * @throws TaskNotExistExecption If the task with the given ID does not exist.
-     */
-    public void deleteById(int id) throws TaskNotExistExecption {
-        Task task = getById(id);
-        dao.delete(task);
-        logger.info("Task deleted: {}", task);
-    }
-
-    /**
-     * Retrieves all tasks.
-     *
-     * @return A list of all tasks.
-     */
-    public List<Task> getAll() {
-        return dao.getAll();
-    }
-
-    /**
-     * Retrieves a task by its ID.
-     *
-     * @param id The ID of the task to retrieve.
-     * @return The task object.
-     * @throws TaskNotExistExecption If the task with the given ID does not exist.
-     */
-    public Task getById(int id) throws TaskNotExistExecption {
-        Task task = dao.findById(id);
+    public Task getById(int id) {
+        Task task = taskDao.findById(id);
         if (task == null) {
-            throw new TaskNotExistExecption("Task with ID " + id + " does not exist.");
+            throw new TaskNotExistExecption("Task does not exist");
         }
         return task;
     }
 
     /**
-     * Counts tasks by their status.
+     * Deletes a task by its unique identifier.
      *
-     * @param status The status to count tasks for.
-     * @return The number of tasks with the specified status.
+     * @param taskId the unique identifier of the task to be deleted
+     * @throws TaskNotExistExecption if no task is found with the given ID
      */
-    public long countTasksByStatus(Status status) {
-        return dao.getAll().stream()
-                .filter(task -> task.getStatus().equals(status))
-                .count();
+    public void deleteTask(int taskId) {
+        Task task = getById(taskId);
+        taskDao.delete(task);
     }
 
     /**
-     * Counts tasks grouped by their status.
+     * Updates an existing task with new information.
      *
-     * @return A map where keys are task statuses and values are counts of tasks with each status.
+     * @param task the task with updated information
+     * @throws TaskNotExistExecption if the task to be updated does not exist
+     * @throws DuplicateTaskExecption if a task with the new title already exists
      */
-    public Map<Status, Long> TasksCountGroupingByStatus() {
-        return dao.getAll().stream()
-                .collect(Collectors.groupingBy(Task::getStatus, Collectors.counting()));
+    public void updateTask(Task task) throws TaskNotExistExecption {
+        Task oldTask = getById(task.getId());
+
+        if (!oldTask.getTitle().equals(task.getTitle())) {
+            if (taskDao.existTaskByTitle(task.getTitle())) {
+                throw new DuplicateTaskExecption("Task title already exists");
+            } else {
+                oldTask.setTitle(task.getTitle());
+            }
+        }
+
+        if (task.getDescription() != null) {
+            oldTask.setDescription(task.getDescription());
+        }
+        if (task.getDueDate() != null) {
+            oldTask.setDueDate(task.getDueDate());
+        }
+        if (task.getStatus() != null) {
+            oldTask.setStatus(task.getStatus());
+        }
+        if (task.getPriority() != null) {
+            oldTask.setPriority(task.getPriority());
+        }
+        if (task.getProject() != null) {
+            oldTask.setProject(task.getProject());
+        }
+
+        taskDao.update(oldTask);
+    }
+
+    /**
+     * Assigns a task to a project.
+     *
+     * @param taskId    the unique identifier of the task
+     * @param projectId the unique identifier of the project
+     */
+    public void assignTaskToProject(int taskId, int projectId) {
+        Project project = projectService.getById(projectId);
+        Task task = getById(taskId);
+        task.setProject(project);
+        project.addTask(task);
+        projectService.updateProject(project);
     }
 }

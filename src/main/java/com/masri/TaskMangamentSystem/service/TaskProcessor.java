@@ -17,19 +17,24 @@ import jakarta.annotation.PreDestroy;
 
 /**
  * Service class that manages task processing asynchronously using an ExecutorService.
+ * <p>
+ * This class uses a fixed thread pool to process tasks concurrently, updating their status and simulating processing time.
+ * </p>
  */
 @Service
 public class TaskProcessor {
 
     private final ExecutorService executorService;
     private final Object lock = new Object(); // Lock object for synchronization
-    private final SecureRandom random = new SecureRandom(); // To generate random numbers safely
+    private final SecureRandom random = new SecureRandom(); // Secure random number generator for simulating processing
     private final Logger logger = LoggerFactory.getLogger(TaskProcessor.class);
 
     private final TaskService taskService;
 
     /**
      * Constructs a TaskProcessor with a fixed thread pool of 10 threads.
+     *
+     * @param taskService The TaskService used to update task statuses in the database.
      */
     @Autowired
     public TaskProcessor(TaskService taskService) {
@@ -39,6 +44,7 @@ public class TaskProcessor {
 
     /**
      * Submits a task to be processed asynchronously.
+     *
      * @param task The task to process.
      */
     public void submitTask(Task task) {
@@ -47,8 +53,9 @@ public class TaskProcessor {
 
     /**
      * Processes a task synchronously. Updates task status from PENDING to IN_PROGRESS,
-     * and from IN_PROGRESS to COMPLETED after simulated processing time.
+     * and from IN_PROGRESS to COMPLETED after a simulated processing time.
      * Updates the task in the database after each status change.
+     *
      * @param task The task to process.
      */
     private void processTask(Task task) {
@@ -56,28 +63,29 @@ public class TaskProcessor {
             synchronized (lock) {
                 System.out.println("Processing task: " + task);
                 if (task.getStatus() == Status.PENDING) {
-                    Thread.sleep(2000);
+                    Thread.sleep(2000); // Simulate processing delay
                     task.setStatus(Status.IN_PROGRESS);
-                    task.setDate(LocalDate.now().plusDays(random.nextInt(3)));
-                    taskService.update(task); // Persist the status change
-                    logger.info("Task status updated to IN_PROGRESS{}", task);
+                    task.setCreationDate(LocalDate.now().plusDays(random.nextInt(3)));
+                    taskService.updateTask(task); // Persist the status change
+                    logger.info("Task status updated to IN_PROGRESS {}", task);
                 } else if (task.getStatus() == Status.IN_PROGRESS) {
-                    Thread.sleep(10000);
+                    Thread.sleep(10000); // Simulate longer processing delay
                     task.setStatus(Status.COMPLETED);
-                    task.setDate(task.getDueDate().minusDays(random.nextInt(4)));
-                    taskService.update(task); // Persist the status change
-                    logger.info("Task status updated to COMPLETED{}", task);
+                    task.setDueDate(task.getDueDate().minusDays(random.nextInt(4)));
+                    taskService.updateTask(task); // Persist the status change
+                    logger.info("Task status updated to COMPLETED {}", task);
                 }
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            logger.warn("Task processing interrupted for task{}", task);
+            logger.warn("Task processing interrupted for task {}", task);
         }
     }
 
     /**
      * Processes a list of tasks asynchronously.
      * Skips tasks that are already marked as COMPLETED.
+     *
      * @param tasks The list of tasks to process.
      */
     public void processAllTasks(List<Task> tasks) {
@@ -94,7 +102,7 @@ public class TaskProcessor {
      * Waits for up to 60 seconds for tasks to complete before forcing shutdown.
      * If the process takes more than 60 seconds, it will shut down.
      */
-    @PreDestroy // When destroyed, the thread pool will shut down
+    @PreDestroy // Method invoked during bean destruction
     public void shutdown() {
         System.out.println("Shutting down TaskProcessor...");
         executorService.shutdown();

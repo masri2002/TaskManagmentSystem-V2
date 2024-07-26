@@ -46,4 +46,6 @@ public interface CrudDao<T> {
      * @return A list of all entities.
      */
     List<T> getAll();
+
+    void deleteAll();
 }

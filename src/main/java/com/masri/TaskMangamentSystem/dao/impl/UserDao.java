@@ -1,6 +1,8 @@
 package com.masri.TaskMangamentSystem.dao.impl;
 
 import com.masri.TaskMangamentSystem.dao.CrudDao;
+import com.masri.TaskMangamentSystem.entity.Project;
+import com.masri.TaskMangamentSystem.entity.Task;
 import com.masri.TaskMangamentSystem.entity.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -17,9 +19,7 @@ import java.util.List;
 @Repository
 @Transactional
 public class UserDao implements CrudDao<User> {
-
     private final EntityManager em;
-
     /**
      * Constructs a UserDao with the specified EntityManager.
      *
@@ -29,7 +29,6 @@ public class UserDao implements CrudDao<User> {
     public UserDao(EntityManager em) {
         this.em = em;
     }
-
     /**
      * Adds a new User entity to the database.
      *
@@ -39,7 +38,6 @@ public class UserDao implements CrudDao<User> {
     public void add(User user) {
         em.persist(user);
     }
-
     /**
      * Updates an existing User entity in the database.
      *
@@ -49,7 +47,6 @@ public class UserDao implements CrudDao<User> {
     public void update(User user) {
         em.merge(user);
     }
-
     /**
      * Checks if a user with the specified email address already exists in the database.
      *
@@ -63,7 +60,6 @@ public class UserDao implements CrudDao<User> {
                     .setParameter("data", email)
                     .getSingleResult();
         } catch (NoResultException e) {
-            // Email does not exist
         }
         return existUser != null;
     }
@@ -98,5 +94,11 @@ public class UserDao implements CrudDao<User> {
     public List<User> getAll() {
         return em.createQuery("FROM User ", User.class).getResultList();
     }
+
+    @Override
+    public void deleteAll() {
+      em.createQuery("delete from User").executeUpdate();
+    }
+
 
 }

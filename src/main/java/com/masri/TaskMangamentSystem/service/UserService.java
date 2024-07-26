@@ -1,146 +1,102 @@
 package com.masri.TaskMangamentSystem.service;
+
 import com.masri.TaskMangamentSystem.dao.impl.UserDao;
-import com.masri.TaskMangamentSystem.entity.Task;
+import com.masri.TaskMangamentSystem.entity.Project;
 import com.masri.TaskMangamentSystem.entity.User;
 import com.masri.TaskMangamentSystem.excptions.exception.DuplicateUserExecption;
-import com.masri.TaskMangamentSystem.excptions.exception.TaskNotExistExecption;
 import com.masri.TaskMangamentSystem.excptions.exception.UserNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.time.LocalDate;
-import java.util.List;
-
 
 /**
- * Service class for managing users.
- * @author Ahmad Al-masri
+ * Service class that manages users in the Task Management System.
+ * Provides functionality for adding, retrieving, updating, and deleting users.
  */
 @Service
 public class UserService {
 
-    private final UserDao dao;
-    private final Logger logger;
-    private final TaskService service;
+    private final UserDao userDao;
+
+    /**
+     * Constructs a UserService with the specified UserDao.
+     *
+     * @param userDao the DAO used to interact with user data
+     */
     @Autowired
-    public UserService(UserDao dao , TaskService service) {
-        this.dao = dao;
-        this.logger = LoggerFactory.getLogger(UserService.class);
-        this.service=service;
+    public UserService(UserDao userDao) {
+        this.userDao = userDao;
     }
 
     /**
-     * Adds a new user to the service.
+     * Adds a new user if the email is not already in use.
      *
-     * @param user The user details to add.
-     * @throws DuplicateUserExecption If a user with the same email already exists.
+     * @param user the user to be added
+     * @throws DuplicateUserExecption if the email is already used by another user
      */
-    public void add(User user) throws DuplicateUserExecption {
-        if (dao.checkEmailUniqueness(user.getEmail())) {
-            throw new DuplicateUserExecption("Email already exists. Please use a different email address.");
+    public void addUser(User user) throws DuplicateUserExecption {
+        if (userDao.checkEmailUniqueness(user.getEmail())) {
+            throw new DuplicateUserExecption("User Email Already Used");
+        } else {
+            userDao.add(user);
         }
-        dao.add(user);
-        logger.info("User added: {}", user);
     }
 
     /**
-     * Updates an existing user's name and email by ID.
+     * Retrieves a user by their unique identifier.
      *
-     * @param user The user data updated details.
-     * @throws UserNotFoundException If no user exists with the given ID.
-     * @throws DuplicateUserExecption If the updated email already exists for another user.
+     * @param id the unique identifier of the user
+     * @return the user with the specified ID
+     * @throws UserNotFoundException if no user is found with the given ID
      */
-    public void update(User user) throws UserNotFoundException, DuplicateUserExecption {
-        User existingUser = dao.findById(user.getId());
-        if (existingUser == null) {
-            throw new UserNotFoundException("User with ID " + user.getId() + " does not exist.");
-        }
-
-        if (user.getEmail() != null && !user.getEmail().equals(existingUser.getEmail())) {
-            if (dao.checkEmailUniqueness(user.getEmail())) {
-                throw new DuplicateUserExecption("Email already exists. Please use a different email address.");
-            }
-            existingUser.setEmail(user.getEmail());
-        }
-
-        if (user.getName() != null) {
-            existingUser.setName(user.getName());
-        }
-
-        dao.update(existingUser);
-        logger.info("User updated: {}", existingUser);
-    }
-    /**
-     * Deletes a user by ID.
-     *
-     * @param id The ID of the user to delete.
-     * @throws UserNotFoundException If no user exists with the given ID.
-     */
-    public void deleteById(int id) throws UserNotFoundException {
-        User user = dao.findById(id);
+    public User getUserById(int id) throws UserNotFoundException {
+        User user = userDao.findById(id);
         if (user == null) {
-            throw new UserNotFoundException("User with ID " + id + " not found.");
-        }
-         if(user.getTasks()!=null){
-             for(Task task : user.getTasks()){
-                 task.setUser(null);
-             }
-         }
-        dao.delete(user);
-        logger.info("User deleted: {}", user);
-    }
-    /**
-     * Retrieves a list of all users.
-     *
-     * @return List of all users in the form of UserDto.
-     * @throws UserNotFoundException If no users are found.
-     */
-    public List<User> getAll() throws UserNotFoundException {
-        List<User> list = dao.getAll();
-        if (list.isEmpty()) {
-            throw new UserNotFoundException("No users found.");
-        }
-
-        return list;
-    }
-    /**
-     * Retrieves a user by ID.
-     *
-     * @param id The ID of the user to retrieve.
-     * @return The UserDto with the specified ID.
-     * @throws UserNotFoundException If no user exists with the given ID.
-     */
-    public User getById(int id) throws UserNotFoundException {
-        User user = dao.findById(id);
-        if (user == null) {
-            throw new UserNotFoundException("User with ID " + id + " not found.");
+            throw new UserNotFoundException("User Not Found");
         }
         return user;
     }
-    public void addTask(int id, Task task) {
-        User user=dao.findById(id);
-        if(user!=null){
-            task.setDate(LocalDate.now());
-           user.addTask(task);
-           dao.update(user);
-        }else{
-            throw new UserNotFoundException("User Not Found");
+
+    /**
+     * Updates an existing user's information.
+     *
+     * @param user the user with updated information
+     * @throws UserNotFoundException if the user to be updated does not exist
+     * @throws DuplicateUserExecption if the updated email is already used by another user
+     */
+    public void updateUser(User user) throws UserNotFoundException, DuplicateUserExecption {
+        User oldUser = getUserById(user.getId());
+
+        if (user.getName() != null) {
+            oldUser.setName(user.getName());
         }
+
+        if (user.getEmail() != null) {
+            if (!user.getEmail().equals(oldUser.getEmail())) {
+                if (userDao.checkEmailUniqueness(user.getEmail())) {
+                    throw new DuplicateUserExecption("User Email Already Used");
+                }
+                oldUser.setEmail(user.getEmail());
+            }
+        }
+
+        userDao.update(oldUser);
     }
 
-    public boolean removeTaskById(int userId , int taskId){
-        User user =getById(userId);
-        Task task =user.getTasks().stream().
-                filter( (t)-> t.getId()==taskId).findFirst().
-                orElseThrow(()->new TaskNotExistExecption("Task Not exist"));
-        task.setUser(null);
-        dao.update(user);
-        return true;
+    /**
+     * Deletes a user by their unique identifier.
+     * Also removes the user from all projects they are associated with.
+     *
+     * @param id the unique identifier of the user to be deleted
+     * @throws UserNotFoundException if no user is found with the given ID
+     */
+    public void deleteUserById(int id) throws UserNotFoundException {
+        User user = getUserById(id);
 
+        // Remove user from all projects
+        for (Project project : user.getProjects()) {
+            project.getUsers().remove(user);
+        }
+
+        userDao.delete(user);
     }
-    public void add(){
-
-    }
-
 }

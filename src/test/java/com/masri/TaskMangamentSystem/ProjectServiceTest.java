@@ -1,133 +1,196 @@
 //package com.masri.TaskMangamentSystem;
 //
-//import com.masri.TaskMangamentSystem.excptions.*;
-//import com.masri.TaskMangamentSystem.entity.Priority;
+//import com.masri.TaskMangamentSystem.dao.impl.ProjectDao;
 //import com.masri.TaskMangamentSystem.entity.Project;
-//import com.masri.TaskMangamentSystem.entity.Status;
 //import com.masri.TaskMangamentSystem.entity.Task;
-//import com.masri.TaskMangamentSystem.Service.ProjectService;
+//import com.masri.TaskMangamentSystem.entity.User;
+//import com.masri.TaskMangamentSystem.excptions.exception.DuplicateProjectsException;
+//import com.masri.TaskMangamentSystem.excptions.exception.ProjectNotFoundExecption;
+//import com.masri.TaskMangamentSystem.service.ProjectService;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Test;
-//import org.springframework.boot.test.context.SpringBootTest;
 //import org.springframework.beans.factory.annotation.Autowired;
-//import java.time.LocalDate;
-//import java.util.List;
+//import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+//import org.springframework.boot.test.context.SpringBootTest;
+//import org.springframework.transaction.annotation.Transactional;
+//
 //import static org.junit.jupiter.api.Assertions.*;
 //
+//import java.util.List;
+//
 //@SpringBootTest
-//public class ProjectServiceTest {
+//@Transactional
+//class ProjectServiceTest {
 //
 //    @Autowired
 //    private ProjectService projectService;
 //
-//    private Project project1;
-//    private Project project2;
-//    private Task task1;
-//    private Task task2;
+//    @Autowired
+//    private ProjectDao projectDao;
 //
 //    @BeforeEach
-//    public void setUp() {
-//        project1 = new Project("Project 1", "Description 1");
-//        project2 = new Project("Project 2", "Description 2");
-//
-//        task1 = new Task("Task 1", "Description 1", Status.COMPLETED, Priority.HIGH,LocalDate.now());
-//        task2 = new Task("Task 2", "Description 2", Status.PENDING,Priority.LOW,LocalDate.now());
+//    void setUp() {
+//        // Clean up the database before each test
+//        projectDao.deleteAll();
 //    }
 //
 //    @Test
-//    public void testAddProject() throws DuplicateProjectsException {
-//        projectService.add(project1);
-//        List<Project> projects = projectService.getAll();
-//        assertTrue(projects.contains(project1));
+//    void testAddProject_ProjectDoesNotExist() {
+//        // Arrange
+//        Project project = new Project("New Project", "Project Description");
+//
+//        // Act
+//        projectService.addProject(project);
+//
+//        // Assert
+//        assertNotNull(projectDao.findById(project.getId()));
 //    }
 //
 //    @Test
-//    public void testAddDuplicateProject() {
-//        assertThrows(DuplicateProjectsException.class, () -> {
-//            projectService.add(project1);
-//            projectService.add(project1);
-//        });
+//    void testAddProject_ProjectAlreadyExists() {
+//        // Arrange
+//        Project project = new Project("Existing Project", "Project Description");
+//        projectDao.add(project);  // Save the project using DAO
+//
+//        // Act & Assert
+//        DuplicateProjectsException exception = assertThrows(DuplicateProjectsException.class, () -> projectService.addProject(project));
+//        assertEquals("Project Already Exists", exception.getMessage());
 //    }
 //
 //    @Test
-//    public void testGetProjectById() throws ProjectNotFoundExecption, DuplicateProjectsException {
-//        projectService.add(project1);
-//        Project foundProject = projectService.getById(project1.getId());
-//        assertEquals(project1, foundProject);
+//    void testGetById_ProjectExists() {
+//        // Arrange
+//        Project project = new Project("Project", "Description");
+//        projectDao.add(project);
+//
+//        // Act
+//        Project result = projectService.getById(project.getId());
+//
+//        // Assert
+//        assertEquals(project, result);
 //    }
 //
 //    @Test
-//    public void testGetProjectByIdNotFound() {
-//        assertThrows(ProjectNotFoundExecption.class, () -> {
-//            projectService.getById(999);
-//        });
+//    void testGetById_ProjectDoesNotExist() {
+//        // Act & Assert
+//        ProjectNotFoundExecption exception = assertThrows(ProjectNotFoundExecption.class, () -> projectService.getById(1));
+//        assertEquals("Project Not Found", exception.getMessage());
 //    }
 //
 //    @Test
-//    public void testDeleteProjectById() throws ProjectNotFoundExecption, DuplicateProjectsException {
-//        projectService.add(project1);
-//        projectService.deleteById(project1.getId());
-//        assertThrows(ProjectNotFoundExecption.class, () -> {
-//            projectService.getById(project1.getId());
-//        });
+//    void testUpdateProject_Success() {
+//        // Arrange
+//        Project oldProject = new Project("Old Project", "Old Description");
+//        projectDao.add(oldProject);
+//        Project newProject = new Project("New Project", "New Description");
+//        newProject.setId(oldProject.getId());
+//
+//        // Act
+//        projectService.updateProject(newProject);
+//
+//        // Assert
+//        Project updatedProject = projectDao.findById(oldProject.getId());
+//        assertNotNull(updatedProject);
+//        assertEquals(newProject.getName(), updatedProject.getName());
+//        assertEquals(newProject.getDescription(), updatedProject.getDescription());
 //    }
 //
 //    @Test
-//    public void testAddTaskToProjectById() throws ProjectNotFoundExecption, DuplicateProjectsException,
-//            TaskNotExistExecption, DuplicateTaskExecption {
-//        projectService.add(project1);
-//        projectService.addTaskToProjectById(project1.getId(), task1);
-//        Project foundProject = projectService.getById(project1.getId());
-//        assertTrue(foundProject.getTasks().contains(task1));
+//    void testUpdateProject_ProjectDoesNotExist() {
+//        // Arrange
+//        Project project = new Project("Project", "Description");
+//        project.setId(1);
+//
+//        // Act & Assert
+//        ProjectNotFoundExecption exception = assertThrows(ProjectNotFoundExecption.class, () -> projectService.updateProject(project));
+//        assertEquals("Project Not Found", exception.getMessage());
 //    }
 //
 //    @Test
-//    public void testUpdateProjectTaskPriorityById() throws ProjectNotFoundExecption, DuplicateProjectsException,
-//            ProjectNotContainsTaskException, TaskNotExistExecption, DuplicateTaskExecption {
-//        projectService.add(project1);
-//        projectService.addTaskToProjectById(project1.getId(), task1);
-//        projectService.updateProjectTaskPriorityById(project1.getId(), task1.getId(), Priority.LOW);
-//        Project foundProject = projectService.getById(project1.getId());
-//        Task updatedTask = foundProject.getTasks().stream().filter(task -> task.getId() == task1.getId()).findFirst().orElse(null);
-//        assertNotNull(updatedTask);
-//        assertEquals(Priority.LOW, updatedTask.getPriority());
+//    void testUpdateProject_DuplicateTitle() {
+//        // Arrange
+//        Project oldProject = new Project("Old Project", "Old Description");
+//        projectDao.add(oldProject);
+//        Project newProject = new Project("New Project", "New Description");
+//        newProject.setId(oldProject.getId());
+//        projectDao.add(new Project("New Project", "Another Description")); // Save a project with the same title
+//
+//        // Act & Assert
+//        DuplicateProjectsException exception = assertThrows(DuplicateProjectsException.class, () -> projectService.updateProject(newProject));
+//        assertEquals("Project With This Title Already Exists", exception.getMessage());
 //    }
 //
 //    @Test
-//    public void testUpdateProjectTaskStatusById() throws ProjectNotFoundExecption, DuplicateProjectsException,
-//            ProjectNotContainsTaskException, TaskNotExistExecption, DuplicateTaskExecption {
-//        projectService.add(project1);
-//        projectService.addTaskToProjectById(project1.getId(), task1);
-//        projectService.updateProjectTaskStatusById(project1.getId(), task1.getId(), Status.COMPLETED);
-//        Project foundProject = projectService.getById(project1.getId());
-//        Task updatedTask = foundProject.getTasks().stream().filter(task -> task.getId() == task1.getId()).findFirst().orElse(null);
-//        assertNotNull(updatedTask);
-//        assertEquals(Status.COMPLETED, updatedTask.getStatus());
+//    void testDeleteProject_Success() {
+//        // Arrange
+//        Project project = new Project("Project", "Description");
+//        projectDao.add(project);
+//
+//        // Act
+//        projectService.deleteProject(project.getId());
+//
+//        // Assert
+//        assertEquals(null,projectDao.findById(project.getId()));
 //    }
 //
 //    @Test
-//    public void testCountTasksByStatus() throws ProjectNotFoundExecption, DuplicateProjectsException,
-//            ProjectNotContainsTaskException, TaskNotExistExecption, DuplicateTaskExecption {
-//        projectService.add(project1);
-//        projectService.addTaskToProjectById(project1.getId(), task1);
-//        projectService.addTaskToProjectById(project1.getId(), task2);
-//        Long count = projectService.countTasksByStatus(project1.getId(), Status.PENDING);
-//        assertEquals(1, count);
+//    void testDeleteProject_ProjectDoesNotExist() {
+//        // Act & Assert
+//        ProjectNotFoundExecption exception = assertThrows(ProjectNotFoundExecption.class, () -> projectService.deleteProject(1));
+//        assertEquals("Project Not Found", exception.getMessage());
 //    }
 //
 //    @Test
-//    public void testCountTasksByStatusMap() throws ProjectNotFoundExecption, DuplicateProjectsException,
-//            ProjectNotContainsTaskException, TaskNotExistExecption, DuplicateTaskExecption {
-//        projectService.add(project1);
-//        projectService.addTaskToProjectById(project1.getId(), task1);
-//        projectService.addTaskToProjectById(project1.getId(), task2);
+//    void testGetProjectDetails_ProjectExists() {
+//        // Arrange
+//        Project project = new Project("Project", "Description");
+//         projectDao.add(project);
 //
-//        // Verify count of tasks by specific statuses
-//        Long count = projectService.countTasksByStatus(project1.getId(), Status.COMPLETED);
-//        Long countInProgress = projectService.countTasksByStatus(project1.getId(), Status.IN_PROGRESS);
+//        // Act
+//        Project result = projectService.getProjectDetails(project.getId());
 //
-//        assertEquals(1, count); // Expecting exactly 1 task with Status.COMPLETED
-//        assertEquals(0,countInProgress);// Expecting exactly 0 task with Status.COMPLETED
+//        // Assert
+//        assertEquals(project, result);
 //    }
 //
+//    @Test
+//    void testGetProjectDetails_ProjectDoesNotExist() {
+//        // Act & Assert
+//        ProjectNotFoundExecption exception = assertThrows(ProjectNotFoundExecption.class, () -> projectService.getProjectDetails(1));
+//        assertEquals("Project Not Found", exception.getMessage());
+//    }
+//
+//    @Test
+//    void testGetProjectUserById() {
+//        // Arrange
+//        Project project = new Project("Project", "Description");
+//       projectDao.add(project);
+//        User user = new User("User", "user@email.com");
+//        project.addUser(user);
+//        projectDao.add(project);
+//
+//        // Act
+//        List<User> users = projectService.getProjectUserById(project.getId());
+//
+//        // Assert
+//        assertEquals(1, users.size());
+//        assertTrue(users.contains(user));
+//    }
+//
+//    @Test
+//    void testGetProjectTaskById() {
+//        // Arrange
+//        Project project = new Project("Project", "Description");
+//        projectDao.add(project);
+//        Task task = new Task("Task", "Task Description", null, null, null);
+//        project.addTask(task);
+//        projectDao.add(project);
+//
+//        // Act
+//        List<Task> tasks = projectService.getProjectTaskById(project.getId());
+//
+//        // Assert
+//        assertEquals(1, tasks.size());
+//        assertTrue(tasks.contains(task));
+//    }
 //}

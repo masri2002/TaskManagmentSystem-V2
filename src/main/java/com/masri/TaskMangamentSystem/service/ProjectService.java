@@ -2,234 +2,139 @@ package com.masri.TaskMangamentSystem.service;
 
 import com.masri.TaskMangamentSystem.dao.impl.ProjectDao;
 import com.masri.TaskMangamentSystem.entity.*;
-import com.masri.TaskMangamentSystem.excptions.exception.DuplicateProjectsException;
-import com.masri.TaskMangamentSystem.excptions.exception.ProjectNotContainsTaskException;
-import com.masri.TaskMangamentSystem.excptions.exception.ProjectNotFoundExecption;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.masri.TaskMangamentSystem.excptions.exception.*;
 import org.springframework.stereotype.Service;
-import java.util.*;
-import java.util.stream.Collectors;
+
+import java.util.List;
 
 /**
  * Service class for managing projects and their associated tasks.
+ * Provides methods for adding, retrieving, updating, and deleting projects.
+ * Also includes functionality to process tasks within a project.
  */
 @Service
 public class ProjectService {
 
-    private final ProjectDao dao;
+    private final ProjectDao projectDao;
     private final UserService userService;
-    private final Logger logger = LoggerFactory.getLogger(ProjectService.class);
 
-    @Autowired
-    public ProjectService(ProjectDao dao, UserService userService) {
-        this.dao = dao;
+    /**
+     * Constructs a ProjectService with the specified ProjectDao and TaskProcessor.
+     *
+     * @param projectDao the DAO used to interact with project data
+
+     */
+    public ProjectService(ProjectDao projectDao, UserService userService) {
+        this.projectDao = projectDao;
         this.userService = userService;
     }
 
     /**
-     * Retrieves all projects.
-     * @return A list of all projects.
+     * Adds a new project if it does not already exist.
+     *
+     * @param project the project to be added
+     * @throws DuplicateProjectsException if a project with the same name already exists
      */
-    public List<Project> getAll() {
-        return dao.getAll();
-    }
-
-    /**
-     * Adds a new project to the database.
-     * @param project The project to be added.
-     * @return true if the project was added successfully; false if it already exists.
-     * @throws DuplicateProjectsException If the project already exists.
-     */
-    public boolean add(Project project) throws DuplicateProjectsException {
-        if (!dao.checkExistsByTitle(project.getTitle())) {
-            dao.add(project);
-            logger.info("Project added: {}", project);
-            return true;
+    public void addProject(Project project) {
+        if (projectDao.checkExistsByTitle(project.getName())) {
+            throw new DuplicateProjectsException("Project Already Exists");
         } else {
-            throw new DuplicateProjectsException("Project already exists");
+            projectDao.add(project);
         }
     }
 
     /**
-     * Retrieves a project by its ID.
-     * @param id The ID of the project to be retrieved.
-     * @return The project with the specified ID.
-     * @throws ProjectNotFoundExecption If the project with the given ID does not exist.
+     * Retrieves a project by its unique identifier.
+     *
+     * @param id the unique identifier of the project
+     * @return the project with the specified ID
+     * @throws ProjectNotFoundExecption if no project is found with the given ID
      */
-    public Project getById(int id) throws ProjectNotFoundExecption {
-        Project project = dao.findById(id);
+    public Project getById(int id) {
+        Project project = projectDao.findById(id);
         if (project == null) {
-            throw new ProjectNotFoundExecption("Project does not exist");
+            throw new ProjectNotFoundExecption("Project Not Found");
         }
         return project;
     }
 
     /**
-     * Deletes a project by its ID.
-     * @param id The ID of the project to be deleted.
-     * @throws ProjectNotFoundExecption If the project with the given ID does not exist.
+     * Updates an existing project.
+     *
+     * @param project the project with updated information
+     * @throws ProjectNotFoundExecption if the project to be updated does not exist
+     * @throws DuplicateProjectsException if a project with the new title already exists
      */
-    public void deleteById(int id) throws ProjectNotFoundExecption {
+    public void updateProject(Project project) throws ProjectNotFoundExecption {
+        Project oldProject = getById(project.getId());
+
+        if (project.getName() != null && !project.getName().equals(oldProject.getName())) {
+            if (projectDao.checkExistsByTitle(project.getName())) {
+                throw new DuplicateProjectsException("Project With This Title Already Exists");
+            } else {
+                oldProject.setName(project.getName());
+            }
+        }
+        if (project.getDescription() != null) {
+            oldProject.setDescription(project.getDescription());
+        }
+
+        projectDao.update(oldProject);
+    }
+
+    /**
+     * Deletes a project by its unique identifier.
+     *
+     * @param id the unique identifier of the project to be deleted
+     * @throws ProjectNotFoundExecption if no project is found with the given ID
+     */
+    public void deleteProject(int id) throws ProjectNotFoundExecption {
         Project project = getById(id);
-        dao.delete(project);
+        projectDao.delete(project);
     }
 
     /**
-     * Adds a task to a project by project ID.
-     * @param projectId The ID of the project.
-     * @param task The task to be added.
-     * @throws ProjectNotFoundExecption If the project with the given ID does not exist.
+     * Retrieves the details of a project including associated tasks and users.
+     *
+     * @param projectId the unique identifier of the project
+     * @return the project with its tasks and users
+     * @throws ProjectNotFoundExecption if no project is found with the given ID
      */
-    public void addTaskToProjectById(int projectId, Task task) throws ProjectNotFoundExecption {
-        Project project = getById(projectId);
-        project.addTask(task);
-        dao.update(project);
-    }
-
-    /**
-     * Updates the priority of a task in a project by project ID and task ID.
-     * @param projectId The ID of the project.
-     * @param taskId The ID of the task.
-     * @param priority The new priority of the task.
-     * @throws ProjectNotFoundExecption If the project with the given ID does not exist.
-     * @throws ProjectNotContainsTaskException If the project does not contain the task with the given ID.
-     */
-    public void updateTaskPriority(int projectId, int taskId, Priority priority) throws ProjectNotFoundExecption, ProjectNotContainsTaskException {
-        Project project = getById(projectId);
-        Task task = project.getTasks().stream()
-                .filter(t -> t.getId() == taskId)
-                .findFirst()
-                .orElseThrow(() -> new ProjectNotContainsTaskException("Task does not exist in the project"));
-        task.setPriority(priority);
-        dao.update(project);
-    }
-
-    /**
-     * Counts the tasks by their status in a project.
-     * @param projectId The ID of the project.
-     * @param status The status of the tasks to be counted.
-     * @return The count of tasks with the specified status.
-     * @throws ProjectNotFoundExecption If the project with the given ID does not exist.
-     * @throws ProjectNotContainsTaskException If the project does not contain any tasks.
-     */
-    public long countTasksByStatus(int projectId, Status status) throws ProjectNotFoundExecption, ProjectNotContainsTaskException {
-        Project project = getById(projectId);
-        if (project.getTasks().isEmpty()) {
-            throw new ProjectNotContainsTaskException("Project does not have tasks");
+    public Project getProjectDetails(int projectId) {
+        Project project = projectDao.getProjectWithItsTaskAndUsersById(projectId);
+        if (project == null) {
+            throw new ProjectNotFoundExecption("Project Not Found");
         }
-        return project.getTasks().stream()
-                .filter(task -> task.getStatus() == status)
-                .count();
+        return project;
     }
 
     /**
-     * Counts the tasks by their status in a project.
-     * @param projectId The ID of the project.
-     * @return A map of status to the count of tasks with that status.
-     * @throws ProjectNotFoundExecption If the project with the given ID does not exist.
-     * @throws ProjectNotContainsTaskException If the project does not contain any tasks.
+     * Retrieves a list of users associated with a project.
+     *
+     * @param projectId the unique identifier of the project
+     * @return a list of users associated with the project
      */
-    public Map<Status, Long> countTasksStatus(int projectId) throws ProjectNotFoundExecption, ProjectNotContainsTaskException {
-        Project project = getById(projectId);
-        if (project.getTasks().isEmpty()) {
-            throw new ProjectNotContainsTaskException("Project does not have tasks");
-        }
-        return project.getTasks().stream()
-                .collect(Collectors.groupingBy(Task::getStatus, Collectors.counting()));
+    public List<User> getProjectUserById(int projectId) {
+        Project project = getProjectDetails(projectId);
+        return project.getUsers().stream().toList();
     }
 
     /**
-     * Adds a user to a project by project ID.
-     * @param projectId The ID of the project.
-     * @param userId The ID of the user to be added.
-     * @throws ProjectNotFoundExecption If the project with the given ID does not exist.
+     * Retrieves a list of tasks associated with a project.
+     *
+     * @param projectId the unique identifier of the project
+     * @return a list of tasks associated with the project
      */
-    public void addUserToProjectById(int projectId, int userId) throws ProjectNotFoundExecption {
-        Project project = getById(projectId);
-        User user = userService.getById(userId);
+    public List<Task> getProjectTaskById(int projectId) {
+        Project project = getProjectDetails(projectId);
+        return project.getTasks().stream().toList();
+    }
+    public void assignUserToProject(int projectId, int userId){
+        Project project =getById(projectId);
+        User user=userService.getUserById(userId);
         project.addUser(user);
-
-        if (user.getTasks() != null) {
-            for (Task task : user.getTasks()) {
-                if (task.getProject() == null) {
-                    project.addTask(task);
-                    task.setProject(project);
-                }
-            }
-        }
-        dao.update(project);
+        updateProject(project);
     }
 
-    /**
-     * Retrieves all users associated with a project by its ID.
-     * @param id The ID of the project.
-     * @return A list of users associated with the project.
-     * @throws ProjectNotFoundExecption If the project with the given ID does not exist.
-     */
-    public List<User> getProjectUsersById(int id) throws ProjectNotFoundExecption {
-        Project project = dao.getProjectWithItsTaskAndUsersById(id);
-        if (project == null) {
-            throw new ProjectNotFoundExecption("Project does not exist");
-        }
-        return new ArrayList<>(project.getUsers());
-    }
 
-    /**
-     * Retrieves all tasks associated with a project by its ID.
-     * @param id The ID of the project.
-     * @return A list of tasks associated with the project.
-     * @throws ProjectNotFoundExecption If the project with the given ID does not exist.
-     */
-    public List<Task> getProjectTasksById(int id) throws ProjectNotFoundExecption {
-        Project project = dao.getProjectWithItsTaskAndUsersById(id);
-        if (project == null) {
-            throw new ProjectNotFoundExecption("Project does not exist");
-        }
-        return new ArrayList<>(project.getTasks());
-    }
-
-    /**
-     * Removes a user from a project by project ID and user ID.
-     * @param projectId The ID of the project.
-     * @param userId The ID of the user to be removed.
-     * @throws ProjectNotFoundExecption If the project with the given ID does not exist.
-     */
-    public void removeUserFromProjectById(int projectId, int userId) throws ProjectNotFoundExecption {
-        Project project = dao.getProjectWithItsTaskAndUsersById(projectId);
-        User user = project.getUsers().stream()
-                .filter(u -> u.getId() == userId)
-                .findFirst()
-                .orElseThrow(() -> new ProjectNotFoundExecption("User not found in the project"));
-
-        user.getProjects().remove(project);
-        project.getTasks().removeIf(task -> {
-            if (task.getProject() != null && task.getProject().getId() == project.getId()) {
-                task.setProject(null);
-                return true;
-            }
-            return false;
-        });
-
-        dao.update(project);
-    }
-
-    /**
-     * Removes a task from a project by project ID and task ID.
-     * @param projectId The ID of the project.
-     * @param taskId The ID of the task to be removed.
-     * @throws ProjectNotFoundExecption If the project with the given ID does not exist.
-     */
-    public void removeTaskFromProjectById(int projectId, int taskId) throws ProjectNotFoundExecption {
-        Project project = dao.getProjectWithItsTaskAndUsersById(projectId);
-        Task task = project.getTasks().stream()
-                .filter(t -> t.getId() == taskId)
-                .findFirst()
-                .orElseThrow(() -> new ProjectNotFoundExecption("Task not found in the project"));
-
-        project.getTasks().remove(task);
-        task.setProject(null);
-        dao.update(project);
-    }
 }

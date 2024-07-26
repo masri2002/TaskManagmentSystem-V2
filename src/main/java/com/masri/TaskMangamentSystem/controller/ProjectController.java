@@ -1,52 +1,63 @@
 package com.masri.TaskMangamentSystem.controller;
 
+import com.masri.TaskMangamentSystem.entity.Project;
+import com.masri.TaskMangamentSystem.entity.Task;
 import com.masri.TaskMangamentSystem.service.ProjectService;
+
 import com.masri.TaskMangamentSystem.service.TaskProcessor;
+import com.masri.TaskMangamentSystem.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.PublicKey;
+import java.util.List;
 
 @RestController
 @RequestMapping("/projects")
 public class ProjectController {
-    private final ProjectService projectService;
+    private final ProjectService service;
     private final TaskProcessor taskProcessor;
-     @Autowired
-    public ProjectController(ProjectService projectService,TaskProcessor taskProcessor) {
-        this.projectService = projectService;
-         this.taskProcessor=taskProcessor;
+    @Autowired
+    public ProjectController(ProjectService service, TaskProcessor taskProcessor) {
+        this.service = service;
+        this.taskProcessor = taskProcessor;
     }
 
-    @PostMapping("/{id}/user/{uId}")
-    public ResponseEntity<?> addUser(@PathVariable int id , @PathVariable int uId){
-        projectService.addUserToProjectById(id,uId);
-        return ResponseEntity.ok("Done");
+    @PostMapping
+    public ResponseEntity<Project> createProject(@RequestBody Project project) {
+         service.addProject(project);
+         return ResponseEntity.ok(project);
     }
-    /**
-     * Endpoint to process all tasks for a given project ID.
-     *
-     * @param id The ID of the project whose tasks are to be processed.
-     * @return A ResponseEntity indicating the processing status.
-     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteProject(@PathVariable int  id) {
+         service.deleteProject(id);
+         return ResponseEntity.ok("Project Deleted");
+    }
+    @PutMapping
+    public ResponseEntity<Project> updateProject(@RequestBody Project project) {
+         service.updateProject(project);
+         return ResponseEntity.ok(project);
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getProject(@PathVariable int id){
+         return ResponseEntity.ok(service.getById(id));
+    }
+    @GetMapping("{pId}/users")
+    public ResponseEntity<?> getProjectUsers(@PathVariable int pId){
+        return ResponseEntity.ok(service.getProjectUserById(pId));
+    }
     @PutMapping("/{id}/process")
-    public ResponseEntity<String> taskProcessor(@PathVariable int id) {
-        try {
-            var tasks = projectService.getProjectTasksById(id);
-            if (tasks.isEmpty()) {
-                return ResponseEntity.badRequest().body("No tasks found for project ID: " + id);
-            }
+    public ResponseEntity<?> processProject(@PathVariable int id){
+        List<Task>list=service.getProjectTaskById(id);
+        taskProcessor.processAllTasks(list);
+         return ResponseEntity.ok("project Tasks start Process");
+    }
+    @PostMapping("/{pId}/user/{uId}")
 
-            taskProcessor.processAllTasks(tasks);
-            return ResponseEntity.ok("Task processing started for project ID: " + id);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("An error occurred while processing tasks: " + e.getMessage());
-        }
-    }
-    @DeleteMapping("/{id}/user/{uId}")
-    public ResponseEntity<?> removeUserFromProject(@PathVariable int id , @PathVariable int uId){
-        projectService.removeUserFromProjectById(id,uId);
-        return ResponseEntity.ok("user removed");
-    }
+   public ResponseEntity<?> addUserToProjectById(@PathVariable int pId,@PathVariable int uId){
+        service.assignUserToProject(pId,uId);
+        return ResponseEntity.ok("user added to project");
+   }
+
 }
