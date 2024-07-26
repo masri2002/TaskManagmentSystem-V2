@@ -2,6 +2,7 @@ package com.masri.TaskMangamentSystem.controller;
 
 import com.masri.TaskMangamentSystem.entity.Task;
 import com.masri.TaskMangamentSystem.service.TaskService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +35,7 @@ public class TaskController {
     @PostMapping
     public ResponseEntity<?> addTask(@RequestBody Task task) {
         taskService.addTask(task);
-        return ResponseEntity.ok("Task Added");
+        return ResponseEntity.status(HttpStatus.CREATED).body("Task Added");
     }
 
     /**
@@ -46,7 +47,7 @@ public class TaskController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTask(@PathVariable int id) {
         taskService.deleteTask(id);
-        return ResponseEntity.ok("Task deleted");
+        return ResponseEntity.status(HttpStatus.OK).body("Task deleted");
     }
 
     /**
@@ -59,7 +60,7 @@ public class TaskController {
     @PutMapping("/{tId}/project/{pId}")
     public ResponseEntity<?> assignTaskToProject(@PathVariable int tId, @PathVariable int pId) {
         taskService.assignTaskToProject(tId, pId);
-        return ResponseEntity.ok("Done");
+        return ResponseEntity.status(HttpStatus.OK).body("Done");
     }
 
     /**
@@ -70,7 +71,7 @@ public class TaskController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getTaskById(@PathVariable int id) {
-        return ResponseEntity.ok(taskService.getById(id));
+        return ResponseEntity. status(HttpStatus.FOUND).body(taskService.getById(id));
     }
 
     /**
@@ -81,11 +82,11 @@ public class TaskController {
      */
     @GetMapping("/{id}/project")
     public ResponseEntity<?> getProjectById(@PathVariable int id) {
-        return ResponseEntity.ok(taskService.getProjectById(id));
+        return ResponseEntity.status(HttpStatus.FOUND).body(taskService.getProjectById(id));
     }
 
     @GetMapping("/status")
     public ResponseEntity<?> getStatusCountForTask() {
-        return ResponseEntity.ok(taskService.TasksCountGroupingByStatus());
+        return ResponseEntity.status(HttpStatus.FOUND).body(taskService.TasksCountGroupingByStatus());
     }
 }

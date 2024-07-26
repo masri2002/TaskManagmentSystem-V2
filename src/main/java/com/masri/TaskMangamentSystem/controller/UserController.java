@@ -6,6 +6,8 @@ import com.masri.TaskMangamentSystem.service.UserService;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +39,7 @@ public class UserController {
     @PostMapping
     public ResponseEntity<?> addUser(@Valid @RequestBody User user){
         service.addUser(user);
-        return ResponseEntity.ok("User Added Successfully");
+        return ResponseEntity.status(HttpStatus.CREATED).body("User Added Successfully");
     }
 
     /**
@@ -48,7 +50,7 @@ public class UserController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable int id){
-        return ResponseEntity.ok((service.getUserById(id)));
+        return ResponseEntity.status(HttpStatus.FOUND).body((service.getUserById(id)));
     }
 
     /**

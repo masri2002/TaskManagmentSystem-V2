@@ -18,7 +18,6 @@ import java.util.Map;
  * <p>
  * This class uses Spring's {@link ControllerAdvice} to handle exceptions and return appropriate HTTP responses.
  * </p>
- * @author ahmad almasri
  */
 @ControllerAdvice
 public class CustomExceptionHandler {
@@ -80,46 +79,47 @@ public class CustomExceptionHandler {
      * Handles exceptions for users not found.
      *
      * @param ex The UserNotFoundException containing the error message.
-     * @return A ResponseEntity containing the error message and an HTTP status of CONFLICT.
+     * @return A ResponseEntity containing the error message and an HTTP status of NOT_FOUND.
      */
     @ExceptionHandler(UserNotFoundException.class)
-    @ResponseStatus(HttpStatus.CONFLICT) // Use CONFLICT to indicate a problem with user identification
+    @ResponseStatus(HttpStatus.NOT_FOUND) // Use NOT_FOUND to indicate a problem with user identification
     @ResponseBody
     public ResponseEntity<Map<String, String>> handleUserNotFoundExceptions(UserNotFoundException ex) {
         Map<String, String> errors = new HashMap<>();
         errors.put("User", ex.getMessage());
 
-        return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
 
     /**
      * Handles exceptions for tasks that do not exist.
      *
      * @param ex The TaskNotExistExecption containing the error message.
-     * @return A ResponseEntity containing the error message and an HTTP status of CONFLICT.
+     * @return A ResponseEntity containing the error message and an HTTP status of NOT_FOUND.
      */
     @ExceptionHandler(TaskNotExistExecption.class)
-    @ResponseStatus(HttpStatus.CONFLICT) // Use CONFLICT to indicate a problem with task identification
+    @ResponseStatus(HttpStatus.NOT_FOUND) // Use NOT_FOUND to indicate a problem with task identification
     @ResponseBody
     public ResponseEntity<Map<String, String>> handleTaskNotFoundExceptions(TaskNotExistExecption ex) {
         Map<String, String> errors = new HashMap<>();
         errors.put("Task", ex.getMessage());
 
-        return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
+
     /**
      * Handles exceptions for projects that do not exist.
      *
      * @param ex The ProjectNotFoundExecption containing the error message.
-     * @return A ResponseEntity containing the error message and an HTTP status of CONFLICT.
+     * @return A ResponseEntity containing the error message and an HTTP status of NOT_FOUND.
      */
     @ExceptionHandler(ProjectNotFoundExecption.class)
-    @ResponseStatus(HttpStatus.CONFLICT) // Use CONFLICT to indicate a problem with task identification
+    @ResponseStatus(HttpStatus.NOT_FOUND) // Use NOT_FOUND to indicate a problem with project identification
     @ResponseBody
     public ResponseEntity<Map<String, String>> handleProjectNotFoundExceptions(ProjectNotFoundExecption ex) {
         Map<String, String> errors = new HashMap<>();
         errors.put("Project", ex.getMessage());
 
-        return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }
 }
