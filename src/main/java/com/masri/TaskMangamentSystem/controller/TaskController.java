@@ -7,9 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * Controller for managing tasks in the Task Management System.
- * Provides endpoints for adding, deleting, assigning tasks to projects, and retrieving tasks.
- * @author ahmad almasri
+ * Handles HTTP requests for managing tasks.
  */
 @RestController
 @RequestMapping("/tasks")
@@ -18,9 +16,9 @@ public class TaskController {
     private final TaskService taskService;
 
     /**
-     * Constructs a TaskController with the specified TaskService.
+     * Constructs a TaskController with the given TaskService.
      *
-     * @param taskService the service used to interact with task data
+     * @param taskService the service for task operations
      */
     public TaskController(TaskService taskService) {
         this.taskService = taskService;
@@ -29,64 +27,69 @@ public class TaskController {
     /**
      * Adds a new task.
      *
-     * @param task the task to be added
-     * @return a response indicating the task was added
+     * @param task the task to add
+     * @return a response indicating success
      */
     @PostMapping
-    public ResponseEntity<?> addTask(@RequestBody Task task) {
+    public ResponseEntity<String> addTask(@RequestBody Task task) {
         taskService.addTask(task);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Task Added");
+        return ResponseEntity.status(HttpStatus.CREATED).body("Task added");
     }
 
     /**
-     * Deletes a task by its unique identifier.
+     * Deletes a task by ID.
      *
-     * @param id the unique identifier of the task to be deleted
-     * @return a response indicating the task was deleted
+     * @param id the ID of the task to delete
+     * @return a response indicating success
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteTask(@PathVariable int id) {
+    public ResponseEntity<String> deleteTask(@PathVariable int id) {
         taskService.deleteTask(id);
-        return ResponseEntity.status(HttpStatus.OK).body("Task deleted");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Task deleted");
     }
 
     /**
      * Assigns a task to a project.
      *
-     * @param tId the unique identifier of the task
-     * @param pId the unique identifier of the project
-     * @return a response indicating the task was assigned to the project
+     * @param tId the task ID
+     * @param pId the project ID
+     * @return a response indicating success
      */
     @PutMapping("/{tId}/project/{pId}")
-    public ResponseEntity<?> assignTaskToProject(@PathVariable int tId, @PathVariable int pId) {
+    public ResponseEntity<String> assignTaskToProject(@PathVariable int tId, @PathVariable int pId) {
         taskService.assignTaskToProject(tId, pId);
-        return ResponseEntity.status(HttpStatus.OK).body("Done");
+        return ResponseEntity.status(HttpStatus.OK).body("Task assigned to project");
     }
 
     /**
-     * Retrieves a task by its unique identifier.
+     * Retrieves a task by ID.
      *
-     * @param id the unique identifier of the task
+     * @param id the ID of the task
      * @return the task with the specified ID
      */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getTaskById(@PathVariable int id) {
-        return ResponseEntity. status(HttpStatus.FOUND).body(taskService.getById(id));
+    public ResponseEntity<Task> getTaskById(@PathVariable int id) {
+        return ResponseEntity.ok(taskService.getById(id));
     }
 
     /**
-     * Retrieves the project associated with a task by the task's unique identifier.
+     * Retrieves the project associated with a task.
      *
-     * @param id the unique identifier of the task
-     * @return the project associated with the specified task ID
+     * @param id the task ID
+     * @return the project associated with the task
      */
     @GetMapping("/{id}/project")
     public ResponseEntity<?> getProjectById(@PathVariable int id) {
-        return ResponseEntity.status(HttpStatus.FOUND).body(taskService.getProjectById(id));
+        return ResponseEntity.ok(taskService.getProjectById(id));
     }
 
+    /**
+     * Retrieves a count of tasks grouped by status.
+     *
+     * @return a map of status counts
+     */
     @GetMapping("/status")
     public ResponseEntity<?> getStatusCountForTask() {
-        return ResponseEntity.status(HttpStatus.FOUND).body(taskService.TasksCountGroupingByStatus());
+        return ResponseEntity.ok(taskService.TasksCountGroupingByStatus());
     }
 }

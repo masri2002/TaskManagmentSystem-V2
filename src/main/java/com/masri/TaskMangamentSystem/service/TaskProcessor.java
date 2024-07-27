@@ -24,7 +24,6 @@ import jakarta.annotation.PreDestroy;
  * @author ahmad almasri
  */
 @Service
-@Transactional
 public class TaskProcessor {
 
     private final ExecutorService executorService;

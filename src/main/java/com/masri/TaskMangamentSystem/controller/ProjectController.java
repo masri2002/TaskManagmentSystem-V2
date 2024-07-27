@@ -15,35 +15,47 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Controller class to manage {@link Project} entity.
+ *  REST controller class for managing {@link Project} entities.
  */
 @RestController
 @RequestMapping("/projects")
 public class ProjectController {
-    private final ProjectService service;
+
+    private final ProjectService projectService;
     private final TaskProcessor taskProcessor;
 
     /**
-     * Constructs a ProjectController with the specified ProjectService and TaskProcessor.
+     *  Constructs a ProjectController with the injected ProjectService and TaskProcessor.
      *
-     * @param service the service layer for managing projects
+     * @param projectService the service layer for managing projects
      * @param taskProcessor for processing project tasks
      */
     @Autowired
-    public ProjectController(ProjectService service, TaskProcessor taskProcessor) {
-        this.service = service;
+    public ProjectController(ProjectService projectService, TaskProcessor taskProcessor) {
+        this.projectService = projectService;
         this.taskProcessor = taskProcessor;
     }
 
     /**
-     * Adds a new project.
+     * Retrieves all projects.
      *
-     * @param project the project to be added
-     * @return the added project with a CREATED status
+     * @return a list of all projects
+     */
+    @GetMapping
+    public ResponseEntity<?> getAllProjects() {
+        List<Project> projects = projectService.getAllProjects();
+        return ResponseEntity.ok(projects);
+    }
+
+    /**
+     * Creates a new project.
+     *
+     * @param project the project to be created
+     * @return the created project with a CREATED status code
      */
     @PostMapping
-    public ResponseEntity<Project> createProject(@RequestBody Project project) {
-        service.addProject(project);
+    public ResponseEntity<?> createProject(@RequestBody Project project) {
+        projectService.addProject(project);
         return ResponseEntity.status(HttpStatus.CREATED).body(project);
     }
 
@@ -51,53 +63,52 @@ public class ProjectController {
      * Deletes a project by its ID.
      *
      * @param id the ID of the project to be deleted
-     * @return a message indicating the project was deleted or a NOT FOUND status if it doesn't exist
+     * @return a success message on deletion or a NOT FOUND status code if the project doesn't exist
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProject(@PathVariable int id) {
-       service.deleteProject(id);
-            return ResponseEntity.ok("Project deleted successfully.");
-
+    public ResponseEntity<?> deleteProject(@PathVariable int id) {
+        projectService.deleteProject(id);
+        return ResponseEntity.ok("Project deleted successfully.");
     }
 
     /**
      * Updates an existing project.
      *
-     * @param project the project to be updated
-     * @return the updated project with an OK status or NOT FOUND if the project doesn't exist
+     * @param id the ID of the project to be updated
+     * @param project the updated project details
+     * @return the updated project or a NOT FOUND status code if the project doesn't exist
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateProject(@PathVariable int id, @RequestBody Project project) {
-       service.updateProject(project);
-       return ResponseEntity.ok(project);
+        projectService.updateProject(project);
+        return ResponseEntity.ok(project);
     }
 
     /**
      * Retrieves a project by its ID.
      *
      * @param id the ID of the project to retrieve
-     * @return the project with the specified ID or a NOT FOUND status if it doesn't exist
+     * @return the project with the specified ID or a NOT FOUND status code if the project doesn't exist
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getProject(@PathVariable int id) {
-        Project project = service.getById(id);
-            return ResponseEntity.ok(project);
+        Project project = projectService.getById(id);
+        return ResponseEntity.ok(project);
     }
 
     /**
      * Retrieves users associated with a project.
      *
      * @param pId the ID of the project
-     * @return a list of users associated with the project or NOT FOUND if the project doesn't exist
+     * @return a list of users associated with the project or a NOT FOUND status code if the project doesn't exist
      */
     @GetMapping("/{pId}/users")
     public ResponseEntity<?> getProjectUsers(@PathVariable int pId) {
-        List<User> users = service.getProjectUserById(pId);
+        List<User> users = projectService.getProjectUserById(pId);
         if (users != null && !users.isEmpty()) {
             return ResponseEntity.ok(users);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No users found for this project.");
-
         }
     }
 
@@ -105,14 +116,14 @@ public class ProjectController {
      * Processes all tasks for a project.
      *
      * @param id the ID of the project
-     * @return a message indicating the project tasks are being processed or NOT FOUND if the project doesn't exist
+     * @return a message indicating the project tasks are being processed or a NOT FOUND status code if the project doesn't exist
      */
-         @PutMapping("/{id}/process")
-        public ResponseEntity<String> processProject(@PathVariable int id){
-        List<Task> tasks = service.getProjectTaskById(id);
+    @PutMapping("/{id}/process")
+    public ResponseEntity<String> processProject(@PathVariable int id) {
+        List<Task> tasks = projectService.getProjectTaskById(id);
         if (tasks != null && !tasks.isEmpty()) {
             taskProcessor.processAllTasks(tasks);
-            return ResponseEntity.ok("Project tasks are being processed.");
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body("Project tasks are being processed.");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No tasks found for this project.");
         }
@@ -127,21 +138,32 @@ public class ProjectController {
      */
     @PostMapping("/{pId}/user/{uId}")
     public ResponseEntity<String> addUserToProjectById(@PathVariable int pId, @PathVariable int uId) {
-        service.assignUserToProject(pId, uId);
-
+        projectService.assignUserToProject(pId, uId);
         return ResponseEntity.ok("User added to the project successfully.");
+    }
 
+    /**
+     * Removes a user from a project.
+     *
+     * @param pId the ID of the project
+     * @param uId the ID of the user
+     * @return a NO_CONTENT status code if successful, otherwise a NOT FOUND status code
+     */
+    @DeleteMapping("/{pId}/user/{uId}")
+    public ResponseEntity<String> deleteUserById(@PathVariable int pId, @PathVariable int uId) {
+        projectService.removeUserFromProject(pId, uId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("deleted");
     }
 
     /**
      * Retrieves tasks associated with a project.
      *
      * @param pId the ID of the project
-     * @return a list of tasks associated with the project or NOT FOUND if the project doesn't exist
+     * @return a list of tasks associated with the project or a NOT FOUND status code if the project doesn't exist
      */
     @GetMapping("/{pId}/tasks")
     public ResponseEntity<?> getProjectTasks(@PathVariable int pId) {
-        List<Task> tasks = service.getProjectTaskById(pId);
+        List<Task> tasks = projectService.getProjectTaskById(pId);
         if (tasks != null && !tasks.isEmpty()) {
             return ResponseEntity.ok(tasks);
         } else {
@@ -153,11 +175,11 @@ public class ProjectController {
      * Retrieves task counts by status for a project.
      *
      * @param pId the ID of the project
-     * @return a map of task counts by status or NOT FOUND if the project doesn't exist
+     * @return a map of task counts by status or a NOT FOUND status code if the project doesn't exist
      */
     @GetMapping("/{pId}/tasks/status")
     public ResponseEntity<?> getTasksCountByStatus(@PathVariable int pId) {
-        Map<Status, Long> taskCounts = service.countTasksStatus(pId);
+        Map<Status, Long> taskCounts = projectService.countTasksStatus(pId);
         if (taskCounts != null && !taskCounts.isEmpty()) {
             return ResponseEntity.ok(taskCounts);
         } else {

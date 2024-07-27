@@ -2,7 +2,6 @@ package com.masri.TaskMangamentSystem.excptions.exception;
 
 /**
  * Exception thrown when a user is not found.
- * @author ahmad almasri
  */
 public class UserNotFoundException extends RuntimeException {
 

@@ -3,9 +3,9 @@ package com.masri.TaskMangamentSystem.service;
 import com.masri.TaskMangamentSystem.dao.impl.TaskDao;
 import com.masri.TaskMangamentSystem.entity.Project;
 import com.masri.TaskMangamentSystem.entity.Status;
+import com.masri.TaskMangamentSystem.entity.Task;
 import com.masri.TaskMangamentSystem.excptions.exception.DuplicateTaskExecption;
 import com.masri.TaskMangamentSystem.excptions.exception.TaskNotExistExecption;
-import com.masri.TaskMangamentSystem.entity.Task;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,18 +17,16 @@ import java.util.stream.Collectors;
  * Service class that manages tasks in the Task Management System.
  * Provides functionality for adding, retrieving, updating, and deleting tasks,
  * as well as assigning tasks to projects.
- * @author ahmad almasri
+ * Author: Ahmad Almasri
  */
 @Service
-@Transactional
 public class TaskService {
 
     private final TaskDao taskDao;
     private final ProjectService projectService;
 
-
     /**
-     * Constructs a TaskService with the specified TaskDao, ProjectService, and UserService.
+     * Constructs a TaskService with the specified TaskDao and ProjectService.
      *
      * @param taskDao        the DAO used to interact with task data
      * @param projectService the service used to interact with project data
@@ -37,7 +35,6 @@ public class TaskService {
     public TaskService(TaskDao taskDao, ProjectService projectService) {
         this.taskDao = taskDao;
         this.projectService = projectService;
-
     }
 
     /**
@@ -46,6 +43,7 @@ public class TaskService {
      * @param task the task to be added
      * @throws DuplicateTaskExecption if a task with the same title already exists
      */
+    @Transactional
     public void addTask(Task task) {
         if (taskDao.existTaskByTitle(task.getTitle())) {
             throw new DuplicateTaskExecption("Task already exists");
@@ -76,6 +74,7 @@ public class TaskService {
      * @param taskId the unique identifier of the task to be deleted
      * @throws TaskNotExistExecption if no task is found with the given ID
      */
+    @Transactional
     public void deleteTask(int taskId) {
         Task task = getById(taskId);
         taskDao.delete(task);
@@ -88,6 +87,7 @@ public class TaskService {
      * @throws TaskNotExistExecption if the task to be updated does not exist
      * @throws DuplicateTaskExecption if a task with the new title already exists
      */
+    @Transactional
     public void updateTask(Task task) throws TaskNotExistExecption {
         Task oldTask = getById(task.getId());
 
@@ -114,7 +114,7 @@ public class TaskService {
         if (task.getProject() != null) {
             oldTask.setProject(task.getProject());
         }
-        if(task.getCreationDate()!=null){
+        if (task.getCreationDate() != null) {
             oldTask.setCreationDate(task.getCreationDate());
         }
 
@@ -127,6 +127,7 @@ public class TaskService {
      * @param taskId    the unique identifier of the task
      * @param projectId the unique identifier of the project
      */
+    @Transactional
     public void assignTaskToProject(int taskId, int projectId) {
         Project project = projectService.getById(projectId);
         Task task = getById(taskId);
@@ -135,10 +136,22 @@ public class TaskService {
         projectService.updateProject(project);
     }
 
-    public Project getProjectById(int taskId){
-        return taskDao.getTaskProjectById(taskId).getProject();
+    /**
+     * Retrieves the project associated with a given task.
+     *
+     * @param taskId the unique identifier of the task
+     * @return the project associated with the task
+     */
+    public Project getProjectById(int taskId) {
+        return taskDao.findById(taskId).getProject();
     }
-    public Map<Status, Long> TasksCountGroupingByStatus() {
+
+    /**
+     * Counts the tasks grouped by their status.
+     *
+     * @return a map of task statuses and their counts
+     */
+    public Map<Status, Long> tasksCountGroupingByStatus() {
         return taskDao.getAll().stream()
                 .collect(Collectors.groupingBy(Task::getStatus, Collectors.counting()));
     }

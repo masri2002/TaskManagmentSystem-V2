@@ -2,7 +2,6 @@ package com.masri.TaskMangamentSystem.excptions.exception;
 
 /**
  * Exception thrown when validation fails.
- * @author ahmad alsri
  */
 public class ValidationException extends RuntimeException {
 

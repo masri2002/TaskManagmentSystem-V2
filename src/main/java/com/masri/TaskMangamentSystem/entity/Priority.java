@@ -5,9 +5,9 @@ package com.masri.TaskMangamentSystem.entity;
  * @author ahmad almasri
  */
 public enum Priority {
-    HIGH(3),    // High priority
-    MEDIUM(2),  // Medium priority
-    LOW(1);     // Low priority
+    HIGH(3),
+    MEDIUM(2),
+    LOW(1);
 
     private final int priority;
 

@@ -15,9 +15,7 @@ import java.util.Map;
 
 /**
  * Global exception handler for handling specific exceptions across the application.
- * <p>
  * This class uses Spring's {@link ControllerAdvice} to handle exceptions and return appropriate HTTP responses.
- * </p>
  */
 @ControllerAdvice
 public class CustomExceptionHandler {

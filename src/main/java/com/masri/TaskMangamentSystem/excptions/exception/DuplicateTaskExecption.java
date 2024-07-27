@@ -2,7 +2,6 @@ package com.masri.TaskMangamentSystem.excptions.exception;
 
 /**
  * Exception thrown when attempting to add a duplicate task.
- * @author ahmad almasri
  */
 public class DuplicateTaskExecption extends RuntimeException {
 

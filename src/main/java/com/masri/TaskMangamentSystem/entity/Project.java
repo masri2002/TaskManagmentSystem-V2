@@ -1,8 +1,6 @@
 package com.masri.TaskMangamentSystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
@@ -143,7 +141,6 @@ public class Project {
     @JoinTable(name = "user_projects",
             joinColumns = {@JoinColumn(name = "project_id")},
             inverseJoinColumns = {@JoinColumn(name = "user_id")})
-    @JsonManagedReference
     @JsonIgnore
     public Set<User> getUsers() {
         return users;

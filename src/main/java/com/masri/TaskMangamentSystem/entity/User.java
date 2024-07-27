@@ -31,8 +31,6 @@ public class User {
     private String email;
 
 
-    private Set<Project> projects;
-
     /**
      * Default constructor for JPA.
      */
@@ -110,40 +108,4 @@ public class User {
         this.email = email;
     }
 
-    /**
-     * Gets the set of projects associated with the user.
-     *
-     * @return the set of projects
-     */
-    @ManyToMany(mappedBy = "users", cascade = {
-            CascadeType.MERGE,
-            CascadeType.PERSIST,
-            CascadeType.REFRESH
-    })
-    @JsonBackReference
-    public Set<Project> getProjects() {
-        return projects;
-    }
-
-    /**
-     * Sets the set of projects associated with the user.
-     *
-     * @param projects the set of projects
-     */
-    public void setProjects(Set<Project> projects) {
-        this.projects = projects;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return id == user.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 }

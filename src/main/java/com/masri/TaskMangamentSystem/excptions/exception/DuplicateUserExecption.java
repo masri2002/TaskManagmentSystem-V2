@@ -2,7 +2,6 @@ package com.masri.TaskMangamentSystem.excptions.exception;
 
 /**
  * Exception thrown when attempting to add a duplicate user.
- * @author ahmad almasri
  */
 public class DuplicateUserExecption extends RuntimeException {
 

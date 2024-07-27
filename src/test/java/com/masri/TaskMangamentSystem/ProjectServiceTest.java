@@ -95,7 +95,7 @@ public class ProjectServiceTest {
 
         projectService.assignUserToProject(project.getId(), user.getId());
 
-        Project fetchedProject = projectService.getProjectDetails(project.getId());
+        Project fetchedProject = projectService.getById(project.getId());
         List<User> users = fetchedProject.getUsers().stream().toList();
         assertTrue(users.contains(user));
     }

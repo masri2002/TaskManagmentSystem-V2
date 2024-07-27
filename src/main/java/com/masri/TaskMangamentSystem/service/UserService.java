@@ -1,7 +1,6 @@
 package com.masri.TaskMangamentSystem.service;
 
 import com.masri.TaskMangamentSystem.dao.impl.UserDao;
-import com.masri.TaskMangamentSystem.entity.Project;
 import com.masri.TaskMangamentSystem.entity.User;
 import com.masri.TaskMangamentSystem.excptions.exception.DuplicateUserExecption;
 import com.masri.TaskMangamentSystem.excptions.exception.UserNotFoundException;
@@ -12,22 +11,25 @@ import org.springframework.stereotype.Service;
 /**
  * Service class that manages users in the Task Management System.
  * Provides functionality for adding, retrieving, updating, and deleting users.
- * @author ahmad almasri
+ * author ahmad almasri
  */
 @Service
 @Transactional
 public class UserService {
 
     private final UserDao userDao;
+    private final ProjectUserService projectService;
 
     /**
-     * Constructs a UserService with the specified UserDao.
+     * Constructs a UserService with the specified UserDao and ProjectService.
      *
      * @param userDao the DAO used to interact with user data
+     * @param projectService the service used to manage projects
      */
     @Autowired
-    public UserService(UserDao userDao) {
+    public UserService(UserDao userDao, ProjectUserService projectService) {
         this.userDao = userDao;
+        this.projectService = projectService;
     }
 
     /**
@@ -94,11 +96,11 @@ public class UserService {
      */
     public void deleteUserById(int id) throws UserNotFoundException {
         User user = getUserById(id);
-        // Remove user from all projects
-        if(user.getProjects()!=null)
-            for (Project project : user.getProjects()) {
-                project.getUsers().remove(user);
-            }
+
+        // Remove user from all projects before deletion
+        projectService.removeUserFromProjects(user);
+
+        // Delete user from the database
         userDao.delete(user);
     }
 }

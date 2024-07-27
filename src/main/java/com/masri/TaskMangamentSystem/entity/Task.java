@@ -31,10 +31,10 @@ public class Task {
 
     private Status status;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
+
     private LocalDate dueDate;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
+
     private LocalDate creationDate;
 
 

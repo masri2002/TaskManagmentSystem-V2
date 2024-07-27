@@ -1,9 +1,0 @@
-com.masri.TaskMangamentSystem
-com.masri.TaskMangamentSystem.configuration
-com.masri.TaskMangamentSystem.controller
-com.masri.TaskMangamentSystem.dao
-com.masri.TaskMangamentSystem.dao.impl
-com.masri.TaskMangamentSystem.entity
-com.masri.TaskMangamentSystem.excptions.contolleradvicer
-com.masri.TaskMangamentSystem.excptions.exception
-com.masri.TaskMangamentSystem.service
