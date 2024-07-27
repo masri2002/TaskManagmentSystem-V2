@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.masri</groupId>
-	<artifactId>TaskMangamentSystem</artifactId>
+	<artifactId>taskmangament</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>TaskMangamentSystem</name>
-	<description>TaskMangamentSystem</description>
+	<name>taskmangament</name>
+	<description>taskmangament</description>
 	<url/>
 	<licenses>
 		<license/>
