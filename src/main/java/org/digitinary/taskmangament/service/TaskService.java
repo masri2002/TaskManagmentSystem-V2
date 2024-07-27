@@ -7,6 +7,8 @@ import org.digitinary.taskmangament.entity.Task;
 import org.digitinary.taskmangament.excptions.exception.DuplicateTaskExecption;
 import org.digitinary.taskmangament.excptions.exception.TaskNotExistExecption;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
@@ -24,6 +26,7 @@ public class TaskService {
 
     private final TaskDao taskDao;
     private final ProjectService projectService;
+    private final Logger logger = LoggerFactory.getLogger(TaskService.class);
 
     /**
      * Constructs a TaskService with the specified TaskDao and ProjectService.
@@ -91,6 +94,7 @@ public class TaskService {
     @Transactional
     public void updateTask(Task task) throws TaskNotExistExecption {
         Task oldTask = getById(task.getId());
+        logger.info("Updating task: {}", task);
 
         if (!oldTask.getTitle().equals(task.getTitle())) {
             if (taskDao.existTaskByTitle(task.getTitle())) {
@@ -99,7 +103,6 @@ public class TaskService {
                 oldTask.setTitle(task.getTitle());
             }
         }
-
         if (task.getDescription() != null) {
             oldTask.setDescription(task.getDescription());
         }
@@ -120,6 +123,7 @@ public class TaskService {
         }
 
         taskDao.update(oldTask);
+        logger.info("Task updated: {}", oldTask);
     }
 
     /**

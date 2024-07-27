@@ -25,16 +25,16 @@ public class Task {
     @NotEmpty(message = "Project title required")
     private String title;
 
-    @NotEmpty(message = "Project description required")
+
     private String description;
 
-    @NotEmpty(message = "Project priority required")
+
     private Priority priority;
 
 
     private Status status;
 
-    @NotEmpty(message = "Due date must not be null")
+
     @Future(message = "Due date must be in the future")
     private LocalDate dueDate;
 
@@ -211,7 +211,12 @@ public class Task {
      *
      * @return the associated project
      */
-    @ManyToOne
+    @ManyToOne(cascade = {
+            CascadeType.MERGE,
+            CascadeType.PERSIST,
+            CascadeType.DETACH,
+            CascadeType.REFRESH
+    })
     @JoinColumn(name = "project_id")
     @JsonBackReference
     public Project getProject() {
